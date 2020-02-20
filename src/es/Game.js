@@ -1,30 +1,35 @@
-import {controller, debug} from './index';
+import {controller} from './index';
 import World from "./World";
 
 export default class Game {
     constructor() {
+        this.debug = true,
         this.canvas = null,
         this.context = null,
         this.canvasWidth = 1300,
         this.canvasHeight = 650,
-        this.world = new World(this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight)
+        this.world = new World(this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight, this.debug)
     }
 
     update() {
         this.world.update();
-
-        if (controller.left.active || controller.right.active ) {
-            controller.left.active ? this.world.player.move(-1) : this.world.player.move(1);
+        
+        if (controller.left.active) {
+            this.world.player.moveLeft();
+        } else if (controller.right.active) {
+            this.world.player.moveRight();
+        } else if (this.debug && controller.up.active) {
+            this.world.player.moveUp();
+        } else if (this.debug && controller.down.active) {
+            this.world.player.moveDown();
         } else {
-            this.world.player.stop();
+            this.world.player.stop(this.debug);
         }
-        if (controller.up.active && this.world.playerCollision.active) {
+
+        if (controller.jump.active && this.world.playerCollision.active) {
             this.world.playerCollision.active = false;
             this.world.player.jump();
         }
-        // console.log(this.world.playerCollision);
-
-        console.log(debug.state);
     }
 
     render() {

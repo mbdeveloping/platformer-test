@@ -8,7 +8,8 @@ export default class Actor {
         this.position = new Vector2D(0, 0),
         this.velocity = new Vector2D(),
         this.jumpDistance = 25;
-        this.isOnGround = false;
+        this.isOnGround = false,
+        this.speed = 5
     }
 
     get left() {
@@ -26,17 +27,29 @@ export default class Actor {
     get bottom() {
         return this.position.y + this.height;
     }
-
-    move(direction) {
-        if (direction === -1) { 
-            this.velocity.x = -5;
-        } else {
-            this.velocity.x = 5;
-        } 
+    
+    moveLeft() {
+        this.velocity.x = -this.speed;
     }
 
-    stop() {
+    moveRight() {
+        this.velocity.x = this.speed;
+    }
+
+    moveUp() {
+        this.velocity.y = -this.speed;
+    }
+
+    moveDown() {
+        this.velocity.y = this.speed;
+    }
+
+    stop(debug) {
         this.velocity.x = 0;
+
+        if (debug) {
+            this.velocity.y = 0;
+        }
     }
 
     jump() {

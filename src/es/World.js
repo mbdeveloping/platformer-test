@@ -3,7 +3,8 @@ import Player from "./Player";
 import Platform from "./Platform";
 
 export default class World {
-    constructor(width, height, canvasWidth, canvasHeight) {
+    constructor(width, height, canvasWidth, canvasHeight, debug) {
+        this.debug = debug,
         this.width = width,
         this.height = height,
         this.canvasWidth = canvasWidth,
@@ -88,18 +89,18 @@ export default class World {
         // this.playerCollideBottom();
         this.playerCollideTop();
 
-        if (this.playerCollision.active) {
-            // console.log('colliding!');
-            this.player.velocity.y = 0;
-        } else {
-            // console.log('not!');
-            this.player.velocity.y += this.gravity;
+        if (!this.debug) {
+            
+            if (this.playerCollision.active) {
+                this.player.velocity.y = 0;
+                
+            } else {
+                this.player.velocity.y += this.gravity;
+            }
         }
 
         // console.log(this.playerCollision.active);
-        // console.log(this.playerCollision.bottom.active);
-
-        // console.log(this.player.velocity.x);
+        console.log(this.player.velocity.y);
     }
 
     render(ctx) {

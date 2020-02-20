@@ -112,22 +112,37 @@ function () {
     _classCallCheck(this, Actor);
 
     this.height = 100, this.width = 50, this.color = 'black', this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.velocity = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](), this.jumpDistance = 25;
-    this.isOnGround = false;
+    this.isOnGround = false, this.speed = 5;
   }
 
   _createClass(Actor, [{
-    key: "move",
-    value: function move(direction) {
-      if (direction === -1) {
-        this.velocity.x = -5;
-      } else {
-        this.velocity.x = 5;
-      }
+    key: "moveLeft",
+    value: function moveLeft() {
+      this.velocity.x = -this.speed;
+    }
+  }, {
+    key: "moveRight",
+    value: function moveRight() {
+      this.velocity.x = this.speed;
+    }
+  }, {
+    key: "moveUp",
+    value: function moveUp() {
+      this.velocity.y = -this.speed;
+    }
+  }, {
+    key: "moveDown",
+    value: function moveDown() {
+      this.velocity.y = this.speed;
     }
   }, {
     key: "stop",
-    value: function stop() {
+    value: function stop(debug) {
       this.velocity.x = 0;
+
+      if (debug) {
+        this.velocity.y = 0;
+      }
     }
   }, {
     key: "jump",
@@ -349,7 +364,7 @@ function () {
   function Game() {
     _classCallCheck(this, Game);
 
-    this.canvas = null, this.context = null, this.canvasWidth = 1300, this.canvasHeight = 650, this.world = new _World__WEBPACK_IMPORTED_MODULE_1__["default"](this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight);
+    this.debug = true, this.canvas = null, this.context = null, this.canvasWidth = 1300, this.canvasHeight = 650, this.world = new _World__WEBPACK_IMPORTED_MODULE_1__["default"](this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight, this.debug);
   }
 
   _createClass(Game, [{
@@ -357,19 +372,22 @@ function () {
     value: function update() {
       this.world.update();
 
-      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active || _index__WEBPACK_IMPORTED_MODULE_0__["controller"].right.active) {
-        _index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active ? this.world.player.move(-1) : this.world.player.move(1);
+      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active) {
+        this.world.player.moveLeft();
+      } else if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].right.active) {
+        this.world.player.moveRight();
+      } else if (this.debug && _index__WEBPACK_IMPORTED_MODULE_0__["controller"].up.active) {
+        this.world.player.moveUp();
+      } else if (this.debug && _index__WEBPACK_IMPORTED_MODULE_0__["controller"].down.active) {
+        this.world.player.moveDown();
       } else {
-        this.world.player.stop();
+        this.world.player.stop(this.debug);
       }
 
-      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].up.active && this.world.playerCollision.active) {
+      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].jump.active && this.world.playerCollision.active) {
         this.world.playerCollision.active = false;
         this.world.player.jump();
-      } // console.log(this.world.playerCollision);
-
-
-      console.log(_index__WEBPACK_IMPORTED_MODULE_0__["debug"].state);
+      }
     }
   }, {
     key: "render",
@@ -475,7 +493,7 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Player; });
 /* harmony import */ var _Actor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Actor */ "./src/es/Actor.js");
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -564,10 +582,10 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var World =
 /*#__PURE__*/
 function () {
-  function World(width, height, canvasWidth, canvasHeight) {
+  function World(width, height, canvasWidth, canvasHeight, debug) {
     _classCallCheck(this, World);
 
-    this.width = width, this.height = height, this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.playerCollision = {
+    this.debug = debug, this.width = width, this.height = height, this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.playerCollision = {
       active: false,
       top: {
         active: false
@@ -652,16 +670,16 @@ function () {
 
       this.playerCollideTop();
 
-      if (this.playerCollision.active) {
-        // console.log('colliding!');
-        this.player.velocity.y = 0;
-      } else {
-        // console.log('not!');
-        this.player.velocity.y += this.gravity;
+      if (!this.debug) {
+        if (this.playerCollision.active) {
+          this.player.velocity.y = 0;
+        } else {
+          this.player.velocity.y += this.gravity;
+        }
       } // console.log(this.playerCollision.active);
-      // console.log(this.playerCollision.bottom.active);
-      // console.log(this.player.velocity.x);
 
+
+      console.log(this.player.velocity.y);
     }
   }, {
     key: "render",
@@ -679,74 +697,25 @@ function () {
 
 /***/ }),
 
-/***/ "./src/es/debug.js":
-/*!*************************!*\
-  !*** ./src/es/debug.js ***!
-  \*************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Debug; });
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Debug =
-/*#__PURE__*/
-function () {
-  function Debug() {
-    _classCallCheck(this, Debug);
-
-    this.on = false;
-  }
-
-  _createClass(Debug, [{
-    key: "moveObject",
-    value: function moveObject(obj) {
-      var mouseX = 0;
-      var mouseY = 0;
-      window.addEventListener('mousemove', function (event) {
-        mouseX = event.clientX;
-        mouseY = event.clientY;
-        console.log(event.clientX);
-      });
-    }
-  }]);
-
-  return Debug;
-}();
-
-
-
-/***/ }),
-
 /***/ "./src/es/index.js":
 /*!*************************!*\
   !*** ./src/es/index.js ***!
   \*************************/
-/*! exports provided: debug, controller */
+/*! exports provided: controller */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debug", function() { return debug; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "controller", function() { return controller; });
 /* harmony import */ var _sass_style_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sass/style.scss */ "./src/sass/style.scss");
 /* harmony import */ var _sass_style_scss__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_sass_style_scss__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Controller__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Controller */ "./src/es/Controller.js");
 /* harmony import */ var _Game__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Game */ "./src/es/Game.js");
 /* harmony import */ var _Engine__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Engine */ "./src/es/Engine.js");
-/* harmony import */ var _debug__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./debug */ "./src/es/debug.js");
 
 
 
 
-
-var debug = new _debug__WEBPACK_IMPORTED_MODULE_4__["default"](true);
 var controller = new _Controller__WEBPACK_IMPORTED_MODULE_1__["default"]();
 var game = new _Game__WEBPACK_IMPORTED_MODULE_2__["default"]();
 var engine = new _Engine__WEBPACK_IMPORTED_MODULE_3__["default"](game);
@@ -757,15 +726,7 @@ window.addEventListener('keydown', function (event) {
 });
 window.addEventListener('keyup', function (event) {
   return controller.keyEvent(event);
-}); // debug
-// if (debug.state) {
-//     window.addEventListener('mousedown', event => {debug.mouseClick(event)});
-//     window.addEventListener('mouseup', event => {debug.mouseClick(event)});
-//     window.addEventListener('mousemove', event => {});
-// } else {
-//     // window.addEventListener("mousedown", handleMouseDown, true);
-//     window.addEventListener("mousemove", handleMouseDown, true);
-// }
+});
 
 /***/ }),
 
