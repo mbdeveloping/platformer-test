@@ -3,7 +3,7 @@ import World from "./World";
 
 export default class Game {
     constructor() {
-        this.debug = true,
+        this.debug = false,
         this.canvas = null,
         this.context = null,
         this.canvasWidth = 1300,
