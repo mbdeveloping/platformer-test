@@ -3,7 +3,7 @@ import World from "./World";
 
 export default class Game {
     constructor() {
-        this.debug = false,
+        this.debug = false, //disables gravity and let player freely walk around canvas
         this.canvas = null,
         this.context = null,
         this.canvasWidth = 1300,

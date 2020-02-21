@@ -364,7 +364,8 @@ function () {
   function Game() {
     _classCallCheck(this, Game);
 
-    this.debug = false, this.canvas = null, this.context = null, this.canvasWidth = 1300, this.canvasHeight = 650, this.world = new _World__WEBPACK_IMPORTED_MODULE_1__["default"](this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight, this.debug);
+    this.debug = false, //disables gravity and let player freely walk around canvas
+    this.canvas = null, this.context = null, this.canvasWidth = 1300, this.canvasHeight = 650, this.world = new _World__WEBPACK_IMPORTED_MODULE_1__["default"](this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight, this.debug);
   }
 
   _createClass(Game, [{
@@ -451,6 +452,12 @@ function () {
     _classCallCheck(this, Platform);
 
     this.height = height, this.width = width, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](x, y), this.color = 'black';
+    this.colliding = {
+      top: false,
+      bottom: false,
+      left: false,
+      right: false
+    };
   }
 
   _createClass(Platform, [{
@@ -597,10 +604,12 @@ function () {
         activePlatformIndex: null
       },
       left: {
-        active: false
+        active: false,
+        activePlatformIndex: null
       },
       right: {
-        active: false
+        active: false,
+        activePlatformIndex: null
       }
     };
   }
@@ -616,42 +625,73 @@ function () {
       return this.rangeCollide(r0.position.x, r0.position.x + r0.width, r1.position.x, r1.position.x + r1.width) && this.rangeCollide(r0.position.y, r0.position.y + r0.height, r1.position.y, r1.position.y + r1.height);
     }
   }, {
-    key: "playerCollideBottom",
-    value: function playerCollideBottom() {
-      if (this.playerCollision.active) {
-        if (this.player.bottom >= this.platforms[this.playerCollision.activePlatformIndex].top && this.player.top < this.platforms[this.playerCollision.activePlatformIndex].top) {
-          console.log('colliding bottom', this.playerCollision.activePlatformIndex);
-          this.playerCollision.bottom.active = true;
-        } else {
-          this.playerCollision.bottom.active = false;
-        }
-      }
+    key: "isPlayerCollideBottomWithPlatform",
+    value: function isPlayerCollideBottomWithPlatform(index) {
+      return this.player.bottom >= this.platforms[index].top && this.player.top < this.platforms[index].top;
     }
   }, {
-    key: "playerCollideTop",
-    value: function playerCollideTop() {
-      if (this.playerCollision.active) {
-        if (this.player.top <= this.platforms[this.playerCollision.activePlatformIndex].bottom && this.player.bottom > this.platforms[this.playerCollision.activePlatformIndex].bottom) {
-          console.log('colliding top', this.playerCollision.activePlatformIndex);
-          this.playerCollision.top.active = true;
-        } else {
-          this.playerCollision.top.active = false;
-        }
-      }
+    key: "isPlayerCollideTopWithPlatform",
+    value: function isPlayerCollideTopWithPlatform(index) {
+      return this.player.top <= this.platforms[index].bottom && this.player.bottom > this.platforms[index].bottom;
     }
+  }, {
+    key: "isPlayerCollideLeftWithPlatform",
+    value: function isPlayerCollideLeftWithPlatform(index) {
+      return this.player.left <= this.platforms[index].right && this.player.right > this.platforms[index].right && this.player.bottom >= this.platforms[index].bottom;
+    }
+  }, {
+    key: "isPlayerCollideRightWithPlatform",
+    value: function isPlayerCollideRightWithPlatform(index) {
+      return this.player.right >= this.platforms[index].left && this.player.left < this.platforms[index].left && this.player.bottom >= this.platforms[index].bottom;
+    }
+  }, {
+    key: "setActiveTop",
+    value: function setActiveTop(bool, i) {
+      this.playerCollision.top.active = bool;
+      this.playerCollision.top.activePlatformIndex = i;
+    }
+  }, {
+    key: "setActiveBottom",
+    value: function setActiveBottom(bool, i) {
+      this.playerCollision.bottom.active = bool;
+      this.playerCollision.bottom.activePlatformIndex = i;
+    }
+  }, {
+    key: "setActiveLeft",
+    value: function setActiveLeft(bool, i) {
+      this.playerCollision.left.active = bool;
+      this.playerCollision.left.activePlatformIndex = i;
+    }
+  }, {
+    key: "setActiveRight",
+    value: function setActiveRight(bool, i) {
+      this.playerCollision.right.active = bool;
+      this.playerCollision.right.activePlatformIndex = i;
+    } // Checks if player collides with any platform and breaks the loop and returns true when it finds first collision
+
   }, {
     key: "playerCollideAll",
     value: function playerCollideAll() {
       for (var i = 0; i < this.platforms.length; i++) {
         if (this.playerCollide(this.player, this.platforms[i])) {
-          this.playerCollision.active = true; // this.player.position.y = this.platforms[i].position.y - this.player.height;
-
-          this.playerCollision.activePlatformIndex = i; // console.log(i);
-
+          this.playerCollision.active = true;
+          this.playerCollision.activePlatformIndex = i;
           break;
         } else {
           this.playerCollision.active = false;
           this.playerCollision.activePlatformIndex = null;
+        }
+      }
+
+      for (var _i = 0; _i < this.platforms.length; _i++) {
+        if (this.playerCollide(this.player, this.platforms[_i])) {
+          this.platforms[_i].color = 'brown';
+          this.isPlayerCollideBottomWithPlatform(_i) ? this.setActiveBottom(true, _i) : this.setActiveBottom(false, null);
+          this.isPlayerCollideTopWithPlatform(_i) ? this.setActiveTop(true, _i) : this.setActiveTop(false, null);
+          this.isPlayerCollideLeftWithPlatform(_i) ? this.setActiveLeft(true, _i) : this.setActiveLeft(false, null);
+          this.isPlayerCollideRightWithPlatform(_i) ? this.setActiveRight(true, _i) : this.setActiveRight(false, null);
+        } else {
+          this.platforms[_i].color = 'black';
         }
       }
     }
@@ -674,8 +714,6 @@ function () {
     value: function update() {
       this.player.update();
       this.playerCollideAll();
-      this.playerCollideBottom();
-      this.playerCollideTop();
 
       if (!this.debug) {
         // Gravity
@@ -697,13 +735,17 @@ function () {
           this.player.velocity.y += this.gravity;
         } // X position
         // Left
-        //Right
 
-      } // console.log(this.playerCollision.top.active);
-      // console.log(this.playerCollision.bottom.active);
-      // console.log(this.playerCollision.active);
-      // console.log(this.playerCollision.activePlatformIndex);
 
+        if (this.playerCollision.active && this.playerCollision.left.active) {
+          this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
+        } // Right
+
+
+        if (this.playerCollision.active && this.playerCollision.right.active) {
+          this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
+        }
+      }
     }
   }, {
     key: "render",

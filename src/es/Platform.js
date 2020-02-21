@@ -6,6 +6,12 @@ export default class Platform {
         this.width = width,
         this.position = new Vector2D(x, y),
         this.color = 'black'
+        this.colliding = {
+            top: false,
+            bottom: false,
+            left: false,
+            right: false
+        }
     }
 
     get left() {

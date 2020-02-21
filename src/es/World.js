@@ -28,8 +28,14 @@ export default class World {
                 active: false,
                 activePlatformIndex: null
             },
-            left: {active: false},
-            right: {active: false}
+            left: {
+                active: false,
+                activePlatformIndex: null
+            },
+            right: {
+                active: false,
+                activePlatformIndex: null
+            }
         }
     }
 
@@ -42,42 +48,68 @@ export default class World {
                 this.rangeCollide(r0.position.y, r0.position.y + r0.height, r1.position.y, r1.position.y + r1.height);
     }
 
-    playerCollideBottom() {
-        if (this.playerCollision.active) {
-            if (this.player.bottom >= this.platforms[this.playerCollision.activePlatformIndex].top && this.player.top < this.platforms[this.playerCollision.activePlatformIndex].top) {
-                console.log('colliding bottom', this.playerCollision.activePlatformIndex);
-                this.playerCollision.bottom.active = true;
-            } else {
-                this.playerCollision.bottom.active = false;
-            }
-        }
+    isPlayerCollideBottomWithPlatform(index) {
+        return this.player.bottom >= this.platforms[index].top && this.player.top < this.platforms[index].top;
     }
 
-    playerCollideTop() {
-        if (this.playerCollision.active) {
-            if (this.player.top <= this.platforms[this.playerCollision.activePlatformIndex].bottom && this.player.bottom > this.platforms[this.playerCollision.activePlatformIndex].bottom) {
-                console.log('colliding top', this.playerCollision.activePlatformIndex);
-                this.playerCollision.top.active = true;
-            } else {
-                this.playerCollision.top.active = false;
-            }
-        }
+    isPlayerCollideTopWithPlatform(index) {
+        return this.player.top <= this.platforms[index].bottom && this.player.bottom > this.platforms[index].bottom;
     }
 
+    isPlayerCollideLeftWithPlatform(index) {
+        return this.player.left <= this.platforms[index].right && this.player.right > this.platforms[index].right && this.player.bottom >= this.platforms[index].bottom;
+    }
+
+    isPlayerCollideRightWithPlatform(index) {
+        return this.player.right >= this.platforms[index].left && this.player.left < this.platforms[index].left && this.player.bottom >= this.platforms[index].bottom;
+    }
+
+    setActiveTop(bool, i) {
+        this.playerCollision.top.active = bool;
+        this.playerCollision.top.activePlatformIndex = i;
+    }
+
+    setActiveBottom(bool, i) {
+        this.playerCollision.bottom.active = bool;
+        this.playerCollision.bottom.activePlatformIndex = i;
+    }
+
+    setActiveLeft(bool, i) {
+        this.playerCollision.left.active = bool;
+        this.playerCollision.left.activePlatformIndex = i;
+    }
+
+    setActiveRight(bool, i) {
+        this.playerCollision.right.active = bool;
+        this.playerCollision.right.activePlatformIndex = i;
+    }
+
+
+    // Checks if player collides with any platform and breaks the loop and returns true when it finds first collision
     playerCollideAll() {
         for (let i = 0; i < this.platforms.length; i++) {
 
             if (this.playerCollide(this.player, this.platforms[i])) {
                 this.playerCollision.active = true;
-                // this.player.position.y = this.platforms[i].position.y - this.player.height;
                 this.playerCollision.activePlatformIndex = i;
-                // console.log(i);
                 break;
             } else {
                 this.playerCollision.active = false;
                 this.playerCollision.activePlatformIndex = null;
             }
         }
+        
+        for (let i = 0; i < this.platforms.length; i++) {
+            if (this.playerCollide(this.player, this.platforms[i])) {
+                this.platforms[i].color = 'brown';
+                this.isPlayerCollideBottomWithPlatform(i) ? this.setActiveBottom(true, i) : this.setActiveBottom(false, null);
+                this.isPlayerCollideTopWithPlatform(i) ? this.setActiveTop(true, i) : this.setActiveTop(false, null);
+                this.isPlayerCollideLeftWithPlatform(i) ? this.setActiveLeft(true, i) : this.setActiveLeft(false, null);
+                this.isPlayerCollideRightWithPlatform(i) ? this.setActiveRight(true, i) : this.setActiveRight(false, null);
+            } else {
+                this.platforms[i].color = 'black';
+            }
+        } 
     }
 
     createSky(ctx) {
@@ -95,8 +127,6 @@ export default class World {
     update() {
         this.player.update();
         this.playerCollideAll();
-        this.playerCollideBottom();
-        this.playerCollideTop();
 
         if (!this.debug) {
             
@@ -122,16 +152,15 @@ export default class World {
 
             // X position
             // Left
-            //Right
+            if (this.playerCollision.active && this.playerCollision.left.active) {
+                this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
+            }
+
+            // Right
+            if (this.playerCollision.active && this.playerCollision.right.active) {
+                this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
+            }
         }
-
-        
-
-        // console.log(this.playerCollision.top.active);
-        // console.log(this.playerCollision.bottom.active);
-        // console.log(this.playerCollision.active);
-
-        // console.log(this.playerCollision.activePlatformIndex);
     }
 
     render(ctx) {
