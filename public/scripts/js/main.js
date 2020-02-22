@@ -550,14 +550,36 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Vector2D; });
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Vector2D = function Vector2D() {
-  var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-  var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  _classCallCheck(this, Vector2D);
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-  this.x = x, this.y = y;
-};
+var Vector2D =
+/*#__PURE__*/
+function () {
+  function Vector2D() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+    _classCallCheck(this, Vector2D);
+
+    this.x = x, this.y = y;
+  }
+
+  _createClass(Vector2D, [{
+    key: "setX",
+    value: function setX(x) {
+      this.x = x;
+    }
+  }, {
+    key: "setY",
+    value: function setY(y) {
+      this.y = y;
+    }
+  }]);
+
+  return Vector2D;
+}();
 
 
 
@@ -625,48 +647,48 @@ function () {
       return this.rangeCollide(r0.position.x, r0.position.x + r0.width, r1.position.x, r1.position.x + r1.width) && this.rangeCollide(r0.position.y, r0.position.y + r0.height, r1.position.y, r1.position.y + r1.height);
     }
   }, {
-    key: "isPlayerCollideBottomWithPlatform",
-    value: function isPlayerCollideBottomWithPlatform(index) {
+    key: "playerCollideBottom",
+    value: function playerCollideBottom(index) {
       return this.player.bottom >= this.platforms[index].top && this.player.top < this.platforms[index].top;
     }
   }, {
-    key: "isPlayerCollideTopWithPlatform",
-    value: function isPlayerCollideTopWithPlatform(index) {
+    key: "playerCollideTop",
+    value: function playerCollideTop(index) {
       return this.player.top <= this.platforms[index].bottom && this.player.bottom > this.platforms[index].bottom;
     }
   }, {
-    key: "isPlayerCollideLeftWithPlatform",
-    value: function isPlayerCollideLeftWithPlatform(index) {
+    key: "playerCollideLeft",
+    value: function playerCollideLeft(index) {
       return this.player.left <= this.platforms[index].right && this.player.right > this.platforms[index].right && this.player.bottom >= this.platforms[index].bottom;
     }
   }, {
-    key: "isPlayerCollideRightWithPlatform",
-    value: function isPlayerCollideRightWithPlatform(index) {
+    key: "playerCollideRight",
+    value: function playerCollideRight(index) {
       return this.player.right >= this.platforms[index].left && this.player.left < this.platforms[index].left && this.player.bottom >= this.platforms[index].bottom;
     }
   }, {
     key: "setActiveTop",
     value: function setActiveTop(bool, i) {
       this.playerCollision.top.active = bool;
-      this.playerCollision.top.activePlatformIndex = i;
+      this.playerCollision.top.activePlatformIndex = i; // console.log('top', i);
     }
   }, {
     key: "setActiveBottom",
     value: function setActiveBottom(bool, i) {
       this.playerCollision.bottom.active = bool;
-      this.playerCollision.bottom.activePlatformIndex = i;
+      this.playerCollision.bottom.activePlatformIndex = i; // console.log('bottom', i);
     }
   }, {
     key: "setActiveLeft",
     value: function setActiveLeft(bool, i) {
       this.playerCollision.left.active = bool;
-      this.playerCollision.left.activePlatformIndex = i;
+      this.playerCollision.left.activePlatformIndex = i; // console.log('left', i);
     }
   }, {
     key: "setActiveRight",
     value: function setActiveRight(bool, i) {
       this.playerCollision.right.active = bool;
-      this.playerCollision.right.activePlatformIndex = i;
+      this.playerCollision.right.activePlatformIndex = i; // console.log('right', i);
     } // Checks if player collides with any platform and breaks the loop and returns true when it finds first collision
 
   }, {
@@ -685,15 +707,29 @@ function () {
 
       for (var _i = 0; _i < this.platforms.length; _i++) {
         if (this.playerCollide(this.player, this.platforms[_i])) {
-          this.platforms[_i].color = 'brown';
-          this.isPlayerCollideBottomWithPlatform(_i) ? this.setActiveBottom(true, _i) : this.setActiveBottom(false, null);
-          this.isPlayerCollideTopWithPlatform(_i) ? this.setActiveTop(true, _i) : this.setActiveTop(false, null);
-          this.isPlayerCollideLeftWithPlatform(_i) ? this.setActiveLeft(true, _i) : this.setActiveLeft(false, null);
-          this.isPlayerCollideRightWithPlatform(_i) ? this.setActiveRight(true, _i) : this.setActiveRight(false, null);
+          this.platforms[_i].color = 'brown'; //@todo tt rm
+
+          this.playerCollideBottom(_i) ? this.setActiveBottom(true, _i) : this.setActiveBottom(false, null);
+          this.playerCollideTop(_i) ? this.setActiveTop(true, _i) : this.setActiveTop(false, null);
+          this.playerCollideLeft(_i) ? this.setActiveLeft(true, _i) : this.setActiveLeft(false, null);
+          this.playerCollideRight(_i) ? this.setActiveRight(true, _i) : this.setActiveRight(false, null);
         } else {
-          this.platforms[_i].color = 'black';
+          this.platforms[_i].color = 'black'; //@todo tt rm
         }
       }
+    }
+  }, {
+    key: "tt",
+    value: function tt() {
+      var _this = this;
+
+      var arrOfCollidedPlatforms = this.platforms.filter(function (platform, i) {
+        if (_this.playerCollide(_this.player, platform)) {
+          return true;
+        }
+      }); // console.log(arrOfCollidedPlatforms);
+
+      return arrOfCollidedPlatforms;
     }
   }, {
     key: "createSky",
@@ -714,38 +750,59 @@ function () {
     value: function update() {
       this.player.update();
       this.playerCollideAll();
+      this.tt();
 
-      if (!this.debug) {
-        // Gravity
-        if (this.playerCollision.active) {
-          this.player.velocity.y = 0;
-        } else {
-          this.player.velocity.y += this.gravity;
-        } // Y position
-        // Bottom
+      if (this.debug) {
+        this.gravity = 0;
+      } // Gravity
 
 
-        if (this.playerCollision.active && this.playerCollision.bottom.active) {
-          this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height;
-        } // Top
+      if (this.playerCollision.active) {
+        this.player.velocity.y = 0;
+      } else {
+        this.player.velocity.y += this.gravity;
+      } // Y position
+      // Bottom
 
 
-        if (this.playerCollision.active && this.playerCollision.top.active) {
-          this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].position.y + this.platforms[this.playerCollision.activePlatformIndex].height;
-          this.player.velocity.y += this.gravity;
-        } // X position
-        // Left
+      if (this.playerCollision.active && this.playerCollision.bottom.active) {
+        this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height;
+      } // Top
 
 
-        if (this.playerCollision.active && this.playerCollision.left.active) {
-          this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
-        } // Right
+      if (this.playerCollision.active && this.playerCollision.top.active) {
+        this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].position.y + this.platforms[this.playerCollision.activePlatformIndex].height;
+        this.player.velocity.y += this.gravity;
+      } // X position
+      // Left
 
 
-        if (this.playerCollision.active && this.playerCollision.right.active) {
-          this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
-        }
-      }
+      if (this.playerCollision.active && this.playerCollision.left.active) {
+        this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
+      } // Right
+
+
+      if (this.playerCollision.active && this.playerCollision.right.active) {
+        this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
+      } // Bottom
+      // if (this.playerCollision.bottom.active) {
+      //     this.player.position.y = this.platforms[this.playerCollision.bottom.activePlatformIndex].top - this.player.height;
+      // }
+      // // Top
+      // if (this.playerCollision.top.active) {
+      //     this.player.position.y = this.platforms[this.playerCollision.top.activePlatformIndex].position.y + this.platforms[this.playerCollision.top.activePlatformIndex].height;
+      //     this.player.velocity.y += this.gravity;
+      // }
+      // // X position
+      // // Left
+      // if (this.playerCollision.left.active) {
+      //     this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
+      // }
+      // // Right
+      // if (this.playerCollision.right.active) {
+      //     this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
+      // }
+
     }
   }, {
     key: "render",
@@ -793,6 +850,19 @@ window.addEventListener('keydown', function (event) {
 window.addEventListener('keyup', function (event) {
   return controller.keyEvent(event);
 });
+
+if (game.debug) {
+  ['mousedown', 'mousemove'].forEach(function (eventName) {
+    game.canvas.addEventListener(eventName, function (event) {
+      if (event.buttons === 1) {
+        game.world.player.velocity.y = 0;
+        game.world.player.velocity.x = 0;
+        game.world.player.position.x = event.offsetX - game.world.player.width / 2;
+        game.world.player.position.y = event.offsetY - game.world.player.height / 2;
+      }
+    });
+  });
+}
 
 /***/ }),
 

@@ -48,40 +48,44 @@ export default class World {
                 this.rangeCollide(r0.position.y, r0.position.y + r0.height, r1.position.y, r1.position.y + r1.height);
     }
 
-    isPlayerCollideBottomWithPlatform(index) {
+    playerCollideBottom(index) {
         return this.player.bottom >= this.platforms[index].top && this.player.top < this.platforms[index].top;
     }
 
-    isPlayerCollideTopWithPlatform(index) {
+    playerCollideTop(index) {
         return this.player.top <= this.platforms[index].bottom && this.player.bottom > this.platforms[index].bottom;
     }
 
-    isPlayerCollideLeftWithPlatform(index) {
+    playerCollideLeft(index) {
         return this.player.left <= this.platforms[index].right && this.player.right > this.platforms[index].right && this.player.bottom >= this.platforms[index].bottom;
     }
 
-    isPlayerCollideRightWithPlatform(index) {
+    playerCollideRight(index) {
         return this.player.right >= this.platforms[index].left && this.player.left < this.platforms[index].left && this.player.bottom >= this.platforms[index].bottom;
     }
 
     setActiveTop(bool, i) {
         this.playerCollision.top.active = bool;
         this.playerCollision.top.activePlatformIndex = i;
+        // console.log('top', i);
     }
 
     setActiveBottom(bool, i) {
         this.playerCollision.bottom.active = bool;
         this.playerCollision.bottom.activePlatformIndex = i;
+        // console.log('bottom', i);
     }
 
     setActiveLeft(bool, i) {
         this.playerCollision.left.active = bool;
         this.playerCollision.left.activePlatformIndex = i;
+        // console.log('left', i);
     }
 
     setActiveRight(bool, i) {
         this.playerCollision.right.active = bool;
         this.playerCollision.right.activePlatformIndex = i;
+        // console.log('right', i);
     }
 
 
@@ -101,15 +105,27 @@ export default class World {
         
         for (let i = 0; i < this.platforms.length; i++) {
             if (this.playerCollide(this.player, this.platforms[i])) {
-                this.platforms[i].color = 'brown';
-                this.isPlayerCollideBottomWithPlatform(i) ? this.setActiveBottom(true, i) : this.setActiveBottom(false, null);
-                this.isPlayerCollideTopWithPlatform(i) ? this.setActiveTop(true, i) : this.setActiveTop(false, null);
-                this.isPlayerCollideLeftWithPlatform(i) ? this.setActiveLeft(true, i) : this.setActiveLeft(false, null);
-                this.isPlayerCollideRightWithPlatform(i) ? this.setActiveRight(true, i) : this.setActiveRight(false, null);
+                this.platforms[i].color = 'brown'; //@todo tt rm
+                this.playerCollideBottom(i) ? this.setActiveBottom(true, i) : this.setActiveBottom(false, null);
+                this.playerCollideTop(i) ? this.setActiveTop(true, i) : this.setActiveTop(false, null);
+                this.playerCollideLeft(i) ? this.setActiveLeft(true, i) : this.setActiveLeft(false, null);
+                this.playerCollideRight(i) ? this.setActiveRight(true, i) : this.setActiveRight(false, null);
             } else {
-                this.platforms[i].color = 'black';
+                this.platforms[i].color = 'black'; //@todo tt rm
             }
-        } 
+        }
+        
+    }
+
+    tt() {
+        let arrOfCollidedPlatforms = this.platforms.filter((platform, i) => {
+            if (this.playerCollide(this.player, platform)) {
+                return true;
+            }
+        });
+
+        // console.log(arrOfCollidedPlatforms);
+        return arrOfCollidedPlatforms;
     }
 
     createSky(ctx) {
@@ -127,40 +143,66 @@ export default class World {
     update() {
         this.player.update();
         this.playerCollideAll();
+        this.tt();
 
-        if (!this.debug) {
-            
-            // Gravity
-            if (this.playerCollision.active) {
-                this.player.velocity.y = 0;
-            } else {
-                this.player.velocity.y += this.gravity;
-            }
+        if (this.debug) {this.gravity = 0}
 
-
-            // Y position
-            // Bottom
-            if (this.playerCollision.active && this.playerCollision.bottom.active) {
-                this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height;
-            }
-
-            // Top
-            if (this.playerCollision.active && this.playerCollision.top.active) {
-                this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].position.y + this.platforms[this.playerCollision.activePlatformIndex].height;
-                this.player.velocity.y += this.gravity;
-            }
-
-            // X position
-            // Left
-            if (this.playerCollision.active && this.playerCollision.left.active) {
-                this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
-            }
-
-            // Right
-            if (this.playerCollision.active && this.playerCollision.right.active) {
-                this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
-            }
+        // Gravity
+        if (this.playerCollision.active) {
+            this.player.velocity.y = 0;
+        } else {
+            this.player.velocity.y += this.gravity;
         }
+
+
+         // Y position
+        // Bottom
+        if (this.playerCollision.active && this.playerCollision.bottom.active) {
+            this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height;
+        }
+
+        // Top
+        if (this.playerCollision.active && this.playerCollision.top.active) {
+            this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].position.y + this.platforms[this.playerCollision.activePlatformIndex].height;
+            this.player.velocity.y += this.gravity;
+        }
+
+        // X position
+        // Left
+        if (this.playerCollision.active && this.playerCollision.left.active) {
+            this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
+        }
+
+        // Right
+        if (this.playerCollision.active && this.playerCollision.right.active) {
+            this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
+        }
+
+
+
+        // Bottom
+        // if (this.playerCollision.bottom.active) {
+        //     this.player.position.y = this.platforms[this.playerCollision.bottom.activePlatformIndex].top - this.player.height;
+        // }
+
+        // // Top
+        // if (this.playerCollision.top.active) {
+        //     this.player.position.y = this.platforms[this.playerCollision.top.activePlatformIndex].position.y + this.platforms[this.playerCollision.top.activePlatformIndex].height;
+        //     this.player.velocity.y += this.gravity;
+        // }
+
+        // // X position
+        // // Left
+        // if (this.playerCollision.left.active) {
+        //     this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
+        // }
+
+        // // Right
+        // if (this.playerCollision.right.active) {
+        //     this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
+        // }
+
+
     }
 
     render(ctx) {

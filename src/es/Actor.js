@@ -27,7 +27,7 @@ export default class Actor {
     get bottom() {
         return this.position.y + this.height;
     }
-    
+
     moveLeft() {
         this.velocity.x = -this.speed;
     }
