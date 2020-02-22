@@ -37,4 +37,8 @@ export default class Platform {
     get bottom() {
         return this.getY + this.height;
     }
+
+    setX(posX) {
+        this.position.x = posX;
+    }
 }

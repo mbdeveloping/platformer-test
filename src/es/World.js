@@ -7,6 +7,7 @@ export default class World {
         this.debug = debug,
         this.width = width,
         this.height = height,
+        this.position = new Vector2D(0, 0),
         this.canvasWidth = canvasWidth,
         this.canvasHeight = canvasHeight,
         this.gravity = 1,
@@ -43,26 +44,25 @@ export default class World {
         return Math.max(min0, max0) >= Math.min(min1, max1) && Math.min(min0, max0) <= Math.max(min1, max1);
     }
 
-    playerCollide(r0, r1) {
-        return this.rangeCollide(r0.position.x, r0.position.x + r0.width, r1.position.x, r1.position.x + r1.width) &&
-                this.rangeCollide(r0.position.y, r0.position.y + r0.height, r1.position.y, r1.position.y + r1.height);
+    objectCollide(obj1, obj2) {
+        return this.rangeCollide(obj1.left, obj1.right, obj2.left, obj2.right) && this.rangeCollide(obj1.top, obj1.bottom, obj2.top, obj2.bottom);
     }
 
-    playerCollideBottom(index) {
-        return this.player.bottom >= this.platforms[index].top && this.player.top < this.platforms[index].top;
-    }
+    // playerCollideBottom(index) {
+    //     return this.player.bottom >= this.platforms[index].top && this.player.top < this.platforms[index].top;
+    // }
 
-    playerCollideTop(index) {
-        return this.player.top <= this.platforms[index].bottom && this.player.bottom > this.platforms[index].bottom;
-    }
+    // playerCollideTop(index) {
+    //     return this.player.top <= this.platforms[index].bottom && this.player.bottom > this.platforms[index].bottom;
+    // }
 
-    playerCollideLeft(index) {
-        return this.player.left <= this.platforms[index].right && this.player.right > this.platforms[index].right && this.player.bottom >= this.platforms[index].bottom;
-    }
+    // playerCollideLeft(index) {
+    //     return this.player.left <= this.platforms[index].right && this.player.right > this.platforms[index].right && this.player.bottom >= this.platforms[index].bottom;
+    // }
 
-    playerCollideRight(index) {
-        return this.player.right >= this.platforms[index].left && this.player.left < this.platforms[index].left && this.player.bottom >= this.platforms[index].bottom;
-    }
+    // playerCollideRight(index) {
+    //     return this.player.right >= this.platforms[index].left && this.player.left < this.platforms[index].left && this.player.bottom >= this.platforms[index].bottom;
+    // }
 
     setActiveTop(bool, i) {
         this.playerCollision.top.active = bool;
@@ -79,6 +79,7 @@ export default class World {
     setActiveLeft(bool, i) {
         this.playerCollision.left.active = bool;
         this.playerCollision.left.activePlatformIndex = i;
+        // console.log('left', i);
     }
 
     setActiveRight(bool, i) {
@@ -90,45 +91,74 @@ export default class World {
 
     // Checks if player collides with any platform and breaks the loop and returns true when it finds first collision
     playerCollideAll() {
-        for (let i = 0; i < this.platforms.length; i++) {
+        // for (let i = 0; i < this.platforms.length; i++) {
 
-            if (this.playerCollide(this.player, this.platforms[i])) {
+        //     if (this.objectCollide(this.player, this.platforms[i])) {
+        //         // this.playerCollision.active = true;
+        //         // this.playerCollision.activePlatformIndex = i;
+        //         break;
+        //     } else {
+        //         // this.playerCollision.active = false;
+        //         // this.playerCollision.activePlatformIndex = null;
+        //     }
+        // }
+
+        this.platforms.forEach((platform, i) => {
+            const player = this.player;
+
+            if (this.objectCollide(player, platform)) {
+                platform.color = 'brown'; //@todo tt rm
                 this.playerCollision.active = true;
-                this.playerCollision.activePlatformIndex = i;
-                break;
+
+                // bottom
+                if (this.rangeCollide(player.top, player.bottom, platform.top, platform.bottom)) {
+                    this.setActiveBottom(true, i);
+                    
+                } else {
+                    this.setActiveBottom(false, null);
+                }
+
+                //
             } else {
+                platform.color = 'black'; //@todo tt rm
+                
                 this.playerCollision.active = false;
-                this.playerCollision.activePlatformIndex = null;
             }
-        }
-        
-        for (let i = 0; i < this.platforms.length; i++) {
-            if (this.playerCollide(this.player, this.platforms[i])) {
-                this.platforms[i].color = 'brown'; //@todo tt rm
-                this.playerCollideBottom(i) ? this.setActiveBottom(true, i) : this.setActiveBottom(false, null);
-                this.playerCollideTop(i) ? this.setActiveTop(true, i) : this.setActiveTop(false, null);
-                this.playerCollideLeft(i) ? this.setActiveLeft(true, i) : this.setActiveLeft(false, null);
-                this.playerCollideRight(i) ? this.setActiveRight(true, i) : this.setActiveRight(false, null);
-            } else {
-                this.platforms[i].color = 'black'; //@todo tt rm
-            }
-        }
+        });
         
     }
 
-    tt() {
-        let arrOfCollidedPlatforms = this.platforms.filter((platform, i) => {
-            if (this.playerCollide(this.player, platform)) {
-                return true;
-            }
-        });
+    worldBoundriesCollision() {
+        // Left
+        if (this.player.left <= this.position.x) {
+            this.player.position.setX(0);
+        }
 
-        // return arrOfCollidedPlatforms;
+        // Right
+        if (this.player.right >= this.width) {
+            this.player.position.setX(this.width - this.player.width)
+        }
 
-        arrOfCollidedPlatforms.forEach((platform, i) => {
-
-        });
+        // Bottom
+        if (this.player.bottom >= this.height) {
+            this.player.position.setY(this.height - this.player.height);
+            // this.playerCollision.active = true;
+        } else {
+            // this.playerCollision.active = false;
+        }
     }
+
+    // ttCollide() {
+    //     let arrOfCollidedPlatforms = this.platforms.filter((platform, i) => {
+    //         if (this.objectCollide(this.player, platform)) {
+    //             return true;
+    //         }
+    //     });
+
+    //     arrOfCollidedPlatforms.forEach((platform, i) => {
+    //         console.log(i);
+    //     });
+    // }
 
     createSky(ctx) {
         ctx.fillStyle = 'skyblue';
@@ -145,7 +175,9 @@ export default class World {
     update() {
         this.player.update();
         this.playerCollideAll();
-        this.tt();
+        this.worldBoundriesCollision();
+        // this.ttCollide();
+        // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
 
         if (this.debug) {this.gravity = 0}
 
@@ -160,12 +192,12 @@ export default class World {
          // Y position
         // Bottom
         if (this.playerCollision.active && this.playerCollision.bottom.active) {
-            this.player.position.setY(this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height);
+            this.player.position.setY(this.platforms[this.playerCollision.bottom.activePlatformIndex].top - this.player.height);
         }
 
         // Top
         if (this.playerCollision.active && this.playerCollision.top.active) {
-            this.player.position.setY(this.platforms[this.playerCollision.activePlatformIndex].bottom + 1);
+            this.player.position.setY(this.platforms[this.playerCollision.top.activePlatformIndex].bottom);
             this.player.velocity.setY(this.player.velocity.getY + this.gravity);
 
             // console.log('top');
@@ -184,7 +216,12 @@ export default class World {
             // console.log('right');
         }
 
-        console.log(this.player.position.getY);
+        // console.log(this.player.position.getY);
+        // console.log(this.player.velocity.getY);
+        // console.log(this.player.velocity.getX);
+
+        // console.log(this.playerCollision.bottom.active);
+        console.log(this.playerCollision.active);
     }
 
     render(ctx) {
