@@ -29,23 +29,23 @@ export default class Actor {
     }
 
     moveLeft() {
-        this.velocity.x = -this.speed;
+        this.velocity.setX(-this.speed);
     }
 
     moveRight() {
-        this.velocity.x = this.speed;
+        this.velocity.setX(this.speed);
     }
 
     moveUp() {
-        this.velocity.y = -this.speed;
+        this.velocity.setY(-this.speed);
     }
 
     moveDown() {
-        this.velocity.y = this.speed;
+        this.velocity.setY(this.speed);
     }
 
     stop(debug) {
-        this.velocity.x = 0;
+        this.velocity.setX(0);
 
         if (debug) {
             this.velocity.y = 0;
@@ -54,7 +54,7 @@ export default class Actor {
 
     jump() {
         // console.log('jumping!');
-        this.velocity.y = -this.jumpDistance;
+        this.velocity.setY(-this.jumpDistance);
     }
 
     attack() {

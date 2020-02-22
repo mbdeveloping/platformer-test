@@ -118,27 +118,27 @@ function () {
   _createClass(Actor, [{
     key: "moveLeft",
     value: function moveLeft() {
-      this.velocity.x = -this.speed;
+      this.velocity.setX(-this.speed);
     }
   }, {
     key: "moveRight",
     value: function moveRight() {
-      this.velocity.x = this.speed;
+      this.velocity.setX(this.speed);
     }
   }, {
     key: "moveUp",
     value: function moveUp() {
-      this.velocity.y = -this.speed;
+      this.velocity.setY(-this.speed);
     }
   }, {
     key: "moveDown",
     value: function moveDown() {
-      this.velocity.y = this.speed;
+      this.velocity.setY(this.speed);
     }
   }, {
     key: "stop",
     value: function stop(debug) {
-      this.velocity.x = 0;
+      this.velocity.setX(0);
 
       if (debug) {
         this.velocity.y = 0;
@@ -148,7 +148,7 @@ function () {
     key: "jump",
     value: function jump() {
       // console.log('jumping!');
-      this.velocity.y = -this.jumpDistance;
+      this.velocity.setY(-this.jumpDistance);
     }
   }, {
     key: "attack",
@@ -568,13 +568,13 @@ function () {
 
   _createClass(Vector2D, [{
     key: "setX",
-    value: function setX(x) {
-      this.x = x;
+    value: function setX(posX) {
+      this.x = posX;
     }
   }, {
     key: "setY",
-    value: function setY(y) {
-      this.y = y;
+    value: function setY(posY) {
+      this.y = posY;
     }
   }]);
 

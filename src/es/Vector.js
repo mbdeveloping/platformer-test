@@ -4,11 +4,11 @@ export default class Vector2D {
         this.y = y
     }
 
-    setX(x) {
-        this.x = x;
+    setX(posX) {
+        this.x = posX;
     }
 
-    setY(y) {
-        this.y = y;
+    setY(posY) {
+        this.y = posY;
     }
 }
