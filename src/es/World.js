@@ -79,7 +79,6 @@ export default class World {
     setActiveLeft(bool, i) {
         this.playerCollision.left.active = bool;
         this.playerCollision.left.activePlatformIndex = i;
-        // console.log('left', i);
     }
 
     setActiveRight(bool, i) {
@@ -124,8 +123,11 @@ export default class World {
             }
         });
 
-        // console.log(arrOfCollidedPlatforms);
-        return arrOfCollidedPlatforms;
+        // return arrOfCollidedPlatforms;
+
+        arrOfCollidedPlatforms.forEach((platform, i) => {
+
+        });
     }
 
     createSky(ctx) {
@@ -136,7 +138,7 @@ export default class World {
     renderPlatforms(ctx) {
         this.platforms.forEach(platform => {
             ctx.fillStyle = platform.color;
-            ctx.fillRect(platform.position.x, platform.position.y, platform.width, platform.height);
+            ctx.fillRect(platform.position.getX, platform.position.getY, platform.width, platform.height);
         });
     }
 
@@ -149,60 +151,40 @@ export default class World {
 
         // Gravity
         if (this.playerCollision.active) {
-            this.player.velocity.y = 0;
+            this.player.velocity.setY(0);
         } else {
-            this.player.velocity.y += this.gravity;
+            this.player.velocity.setY(this.player.velocity.getY + this.gravity);
         }
 
 
          // Y position
         // Bottom
         if (this.playerCollision.active && this.playerCollision.bottom.active) {
-            this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height;
+            this.player.position.setY(this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height);
         }
 
         // Top
         if (this.playerCollision.active && this.playerCollision.top.active) {
-            this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].position.y + this.platforms[this.playerCollision.activePlatformIndex].height;
-            this.player.velocity.y += this.gravity;
+            this.player.position.setY(this.platforms[this.playerCollision.activePlatformIndex].bottom + 1);
+            this.player.velocity.setY(this.player.velocity.getY + this.gravity);
+
+            // console.log('top');
         }
 
         // X position
         // Left
         if (this.playerCollision.active && this.playerCollision.left.active) {
-            this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
+            this.player.position.setX(this.platforms[this.playerCollision.left.activePlatformIndex].right + 1);
+            // console.log('left');
         }
 
         // Right
         if (this.playerCollision.active && this.playerCollision.right.active) {
-            this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
+            this.player.position.setX(this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width - 1);
+            // console.log('right');
         }
 
-
-
-        // Bottom
-        // if (this.playerCollision.bottom.active) {
-        //     this.player.position.y = this.platforms[this.playerCollision.bottom.activePlatformIndex].top - this.player.height;
-        // }
-
-        // // Top
-        // if (this.playerCollision.top.active) {
-        //     this.player.position.y = this.platforms[this.playerCollision.top.activePlatformIndex].position.y + this.platforms[this.playerCollision.top.activePlatformIndex].height;
-        //     this.player.velocity.y += this.gravity;
-        // }
-
-        // // X position
-        // // Left
-        // if (this.playerCollision.left.active) {
-        //     this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
-        // }
-
-        // // Right
-        // if (this.playerCollision.right.active) {
-        //     this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
-        // }
-
-
+        console.log(this.player.position.getY);
     }
 
     render(ctx) {

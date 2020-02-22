@@ -14,19 +14,27 @@ export default class Platform {
         }
     }
 
-    get left() {
+    get getX() {
         return this.position.x;
     }
 
+    get getY() {
+        return this.position.y;
+    } 
+
+    get left() {
+        return this.getX;
+    }
+
     get right() {
-        return this.position.x + this.width;
+        return this.getX + this.width;
     }
 
     get top() {
-        return this.position.y;
+        return this.getY;
     }
 
     get bottom() {
-        return this.position.y + this.height;
+        return this.getY + this.height;
     }
 }

@@ -461,24 +461,34 @@ function () {
   }
 
   _createClass(Platform, [{
-    key: "left",
+    key: "getX",
     get: function get() {
       return this.position.x;
     }
   }, {
-    key: "right",
-    get: function get() {
-      return this.position.x + this.width;
-    }
-  }, {
-    key: "top",
+    key: "getY",
     get: function get() {
       return this.position.y;
     }
   }, {
+    key: "left",
+    get: function get() {
+      return this.getX;
+    }
+  }, {
+    key: "right",
+    get: function get() {
+      return this.getX + this.width;
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return this.getY;
+    }
+  }, {
     key: "bottom",
     get: function get() {
-      return this.position.y + this.height;
+      return this.getY + this.height;
     }
   }]);
 
@@ -575,6 +585,16 @@ function () {
     key: "setY",
     value: function setY(posY) {
       this.y = posY;
+    }
+  }, {
+    key: "getX",
+    get: function get() {
+      return this.x;
+    }
+  }, {
+    key: "getY",
+    get: function get() {
+      return this.y;
     }
   }]);
 
@@ -682,7 +702,7 @@ function () {
     key: "setActiveLeft",
     value: function setActiveLeft(bool, i) {
       this.playerCollision.left.active = bool;
-      this.playerCollision.left.activePlatformIndex = i; // console.log('left', i);
+      this.playerCollision.left.activePlatformIndex = i;
     }
   }, {
     key: "setActiveRight",
@@ -727,9 +747,9 @@ function () {
         if (_this.playerCollide(_this.player, platform)) {
           return true;
         }
-      }); // console.log(arrOfCollidedPlatforms);
+      }); // return arrOfCollidedPlatforms;
 
-      return arrOfCollidedPlatforms;
+      arrOfCollidedPlatforms.forEach(function (platform, i) {});
     }
   }, {
     key: "createSky",
@@ -742,7 +762,7 @@ function () {
     value: function renderPlatforms(ctx) {
       this.platforms.forEach(function (platform) {
         ctx.fillStyle = platform.color;
-        ctx.fillRect(platform.position.x, platform.position.y, platform.width, platform.height);
+        ctx.fillRect(platform.position.getX, platform.position.getY, platform.width, platform.height);
       });
     }
   }, {
@@ -758,51 +778,35 @@ function () {
 
 
       if (this.playerCollision.active) {
-        this.player.velocity.y = 0;
+        this.player.velocity.setY(0);
       } else {
-        this.player.velocity.y += this.gravity;
+        this.player.velocity.setY(this.player.velocity.getY + this.gravity);
       } // Y position
       // Bottom
 
 
       if (this.playerCollision.active && this.playerCollision.bottom.active) {
-        this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height;
+        this.player.position.setY(this.platforms[this.playerCollision.activePlatformIndex].top - this.player.height);
       } // Top
 
 
       if (this.playerCollision.active && this.playerCollision.top.active) {
-        this.player.position.y = this.platforms[this.playerCollision.activePlatformIndex].position.y + this.platforms[this.playerCollision.activePlatformIndex].height;
-        this.player.velocity.y += this.gravity;
+        this.player.position.setY(this.platforms[this.playerCollision.activePlatformIndex].bottom + 1);
+        this.player.velocity.setY(this.player.velocity.getY + this.gravity); // console.log('top');
       } // X position
       // Left
 
 
       if (this.playerCollision.active && this.playerCollision.left.active) {
-        this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
+        this.player.position.setX(this.platforms[this.playerCollision.left.activePlatformIndex].right + 1); // console.log('left');
       } // Right
 
 
       if (this.playerCollision.active && this.playerCollision.right.active) {
-        this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
-      } // Bottom
-      // if (this.playerCollision.bottom.active) {
-      //     this.player.position.y = this.platforms[this.playerCollision.bottom.activePlatformIndex].top - this.player.height;
-      // }
-      // // Top
-      // if (this.playerCollision.top.active) {
-      //     this.player.position.y = this.platforms[this.playerCollision.top.activePlatformIndex].position.y + this.platforms[this.playerCollision.top.activePlatformIndex].height;
-      //     this.player.velocity.y += this.gravity;
-      // }
-      // // X position
-      // // Left
-      // if (this.playerCollision.left.active) {
-      //     this.player.position.x = this.platforms[this.playerCollision.left.activePlatformIndex].right;
-      // }
-      // // Right
-      // if (this.playerCollision.right.active) {
-      //     this.player.position.x = this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width;
-      // }
+        this.player.position.setX(this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width - 1); // console.log('right');
+      }
 
+      console.log(this.player.position.getY);
     }
   }, {
     key: "render",
