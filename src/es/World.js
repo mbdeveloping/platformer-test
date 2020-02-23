@@ -2,6 +2,7 @@ import Vector2D from "./Vector";
 import Player from "./Player";
 import Platform from "./Platform";
 import {isOnGroundEl, playerVelY, playerVelX, playerPosY, playerPosX} from './index';
+import Enemy from "./Enemy";
 
 export default class World {
     constructor(width, height, canvasWidth, canvasHeight, debug) {
@@ -38,7 +39,8 @@ export default class World {
                 active: false,
                 activePlatformIndex: null
             }
-        }
+        },
+        this.enemy = new Enemy(0, 0)
     }
 
     rangeCollide(min0, max0, min1, max1) {
@@ -139,6 +141,7 @@ export default class World {
     }
 
     update() {
+        this.enemy.update();
         this.player.update();
         this.playerCollideAll();
         this.worldBoundriesCollision();
@@ -160,5 +163,6 @@ export default class World {
         this.createSky(ctx);
         this.renderPlatforms(ctx);
         this.player.render(ctx);
+        this.enemy.render(ctx);
     }
 }
