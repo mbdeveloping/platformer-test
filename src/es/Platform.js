@@ -6,21 +6,39 @@ export default class Platform {
         this.width = width,
         this.position = new Vector2D(x, y),
         this.color = 'black'
+        this.colliding = {
+            top: false,
+            bottom: false,
+            left: false,
+            right: false
+        }
     }
 
-    get left() {
+    get getX() {
         return this.position.x;
     }
 
+    get getY() {
+        return this.position.y;
+    } 
+
+    get left() {
+        return this.getX;
+    }
+
     get right() {
-        return this.position.x + this.width;
+        return this.getX + this.width;
     }
 
     get top() {
-        return this.position.y;
+        return this.getY;
     }
 
     get bottom() {
-        return this.position.y + this.height;
+        return this.getY + this.height;
+    }
+
+    setX(posX) {
+        this.position.x = posX;
     }
 }

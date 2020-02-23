@@ -112,28 +112,43 @@ function () {
     _classCallCheck(this, Actor);
 
     this.height = 100, this.width = 50, this.color = 'black', this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.velocity = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](), this.jumpDistance = 25;
-    this.isOnGround = false;
+    this.isOnGround = false, this.speed = 5;
   }
 
   _createClass(Actor, [{
-    key: "move",
-    value: function move(direction) {
-      if (direction === -1) {
-        this.velocity.x = -5;
-      } else {
-        this.velocity.x = 5;
-      }
+    key: "moveLeft",
+    value: function moveLeft() {
+      this.velocity.setX(-this.speed);
+    }
+  }, {
+    key: "moveRight",
+    value: function moveRight() {
+      this.velocity.setX(this.speed);
+    }
+  }, {
+    key: "moveUp",
+    value: function moveUp() {
+      this.velocity.setY(-this.speed);
+    }
+  }, {
+    key: "moveDown",
+    value: function moveDown() {
+      this.velocity.setY(this.speed);
     }
   }, {
     key: "stop",
-    value: function stop() {
-      this.velocity.x = 0;
+    value: function stop(debug) {
+      this.velocity.setX(0);
+
+      if (debug) {
+        this.velocity.y = 0;
+      }
     }
   }, {
     key: "jump",
     value: function jump() {
       // console.log('jumping!');
-      this.velocity.y = -this.jumpDistance;
+      this.velocity.setY(-this.jumpDistance);
     }
   }, {
     key: "attack",
@@ -349,7 +364,8 @@ function () {
   function Game() {
     _classCallCheck(this, Game);
 
-    this.canvas = null, this.context = null, this.canvasWidth = 1300, this.canvasHeight = 650, this.world = new _World__WEBPACK_IMPORTED_MODULE_1__["default"](this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight);
+    this.debug = false, //disables gravity and let player freely walk around canvas
+    this.canvas = null, this.context = null, this.canvasWidth = 1300, this.canvasHeight = 650, this.world = new _World__WEBPACK_IMPORTED_MODULE_1__["default"](this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight, this.debug);
   }
 
   _createClass(Game, [{
@@ -357,19 +373,22 @@ function () {
     value: function update() {
       this.world.update();
 
-      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active || _index__WEBPACK_IMPORTED_MODULE_0__["controller"].right.active) {
-        _index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active ? this.world.player.move(-1) : this.world.player.move(1);
+      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active) {
+        this.world.player.moveLeft();
+      } else if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].right.active) {
+        this.world.player.moveRight();
+      } else if (this.debug && _index__WEBPACK_IMPORTED_MODULE_0__["controller"].up.active) {
+        this.world.player.moveUp();
+      } else if (this.debug && _index__WEBPACK_IMPORTED_MODULE_0__["controller"].down.active) {
+        this.world.player.moveDown();
       } else {
-        this.world.player.stop();
+        this.world.player.stop(this.debug);
       }
 
-      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].up.active && this.world.playerCollision.active) {
-        this.world.playerCollision.active = false;
+      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].jump.active && this.world.player.isOnGround) {
+        this.world.player.isOnGround = false;
         this.world.player.jump();
-      } // console.log(this.world.playerCollision);
-
-
-      console.log(_index__WEBPACK_IMPORTED_MODULE_0__["debug"].state);
+      }
     }
   }, {
     key: "render",
@@ -433,27 +452,48 @@ function () {
     _classCallCheck(this, Platform);
 
     this.height = height, this.width = width, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](x, y), this.color = 'black';
+    this.colliding = {
+      top: false,
+      bottom: false,
+      left: false,
+      right: false
+    };
   }
 
   _createClass(Platform, [{
-    key: "left",
+    key: "setX",
+    value: function setX(posX) {
+      this.position.x = posX;
+    }
+  }, {
+    key: "getX",
     get: function get() {
       return this.position.x;
     }
   }, {
-    key: "right",
-    get: function get() {
-      return this.position.x + this.width;
-    }
-  }, {
-    key: "top",
+    key: "getY",
     get: function get() {
       return this.position.y;
     }
   }, {
+    key: "left",
+    get: function get() {
+      return this.getX;
+    }
+  }, {
+    key: "right",
+    get: function get() {
+      return this.getX + this.width;
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return this.getY;
+    }
+  }, {
     key: "bottom",
     get: function get() {
-      return this.position.y + this.height;
+      return this.getY + this.height;
     }
   }]);
 
@@ -475,7 +515,7 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Player; });
 /* harmony import */ var _Actor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Actor */ "./src/es/Actor.js");
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -525,14 +565,46 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Vector2D; });
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Vector2D = function Vector2D() {
-  var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-  var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  _classCallCheck(this, Vector2D);
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-  this.x = x, this.y = y;
-};
+var Vector2D =
+/*#__PURE__*/
+function () {
+  function Vector2D() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+    _classCallCheck(this, Vector2D);
+
+    this.x = x, this.y = y;
+  }
+
+  _createClass(Vector2D, [{
+    key: "setX",
+    value: function setX(posX) {
+      this.x = posX;
+    }
+  }, {
+    key: "setY",
+    value: function setY(posY) {
+      this.y = posY;
+    }
+  }, {
+    key: "getX",
+    get: function get() {
+      return this.x;
+    }
+  }, {
+    key: "getY",
+    get: function get() {
+      return this.y;
+    }
+  }]);
+
+  return Vector2D;
+}();
 
 
 
@@ -551,6 +623,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector */ "./src/es/Vector.js");
 /* harmony import */ var _Player__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Player */ "./src/es/Player.js");
 /* harmony import */ var _Platform__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Platform */ "./src/es/Platform.js");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./index */ "./src/es/index.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -561,25 +634,31 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
+
 var World =
 /*#__PURE__*/
 function () {
-  function World(width, height, canvasWidth, canvasHeight) {
+  function World(width, height, canvasWidth, canvasHeight, debug) {
     _classCallCheck(this, World);
 
-    this.width = width, this.height = height, this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.playerCollision = {
+    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.playerCollision = {
       active: false,
+      activePlatformIndex: null,
       top: {
-        active: false
+        active: false,
+        activePlatformIndex: null
       },
       bottom: {
-        active: false
+        active: false,
+        activePlatformIndex: null
       },
       left: {
-        active: false
+        active: false,
+        activePlatformIndex: null
       },
       right: {
-        active: false
+        active: false,
+        activePlatformIndex: null
       }
     };
   }
@@ -590,44 +669,87 @@ function () {
       return Math.max(min0, max0) >= Math.min(min1, max1) && Math.min(min0, max0) <= Math.max(min1, max1);
     }
   }, {
-    key: "playerCollide",
-    value: function playerCollide(r0, r1) {
-      return this.rangeCollide(r0.position.x, r0.position.x + r0.width, r1.position.x, r1.position.x + r1.width) && this.rangeCollide(r0.position.y, r0.position.y + r0.height, r1.position.y, r1.position.y + r1.height);
+    key: "objectCollide",
+    value: function objectCollide(obj1, obj2) {
+      return this.rangeCollide(obj1.left, obj1.right, obj2.left, obj2.right) && this.rangeCollide(obj1.top, obj1.bottom, obj2.top, obj2.bottom);
     }
   }, {
-    key: "playerCollideBottom",
-    value: function playerCollideBottom() {
-      for (var i = 0; i < this.platforms.length; i++) {
-        if (this.playerCollision.active && this.player.bottom >= this.platforms[i].top) {
-          this.playerCollision.bottom.active = true;
-          console.log('BOTTOM colliding!');
-          break;
-        } else {
-          this.playerCollision.bottom.active = false;
+    key: "getInsersectingPlatforms",
+    value: function getInsersectingPlatforms() {
+      var _this = this;
+
+      var intersectingPlatforms = this.platforms.filter(function (platform) {
+        if (_this.objectCollide(_this.player, platform)) {
+          return true;
         }
-      }
-    }
-  }, {
-    key: "playerCollideTop",
-    value: function playerCollideTop() {
-      for (var i = 0; i < this.platforms.length; i++) {
-        if (this.playerCollision.active && this.player.top >= this.platforms[i].top && this.player.top <= this.platforms[i].bottom) {
-          console.log('TOP colliding!');
-          break;
-        }
-      }
+      });
+      return intersectingPlatforms;
     }
   }, {
     key: "playerCollideAll",
     value: function playerCollideAll() {
-      for (var i = 0; i < this.platforms.length; i++) {
-        if (this.playerCollide(this.player, this.platforms[i])) {
-          this.playerCollision.active = true;
-          this.player.position.y = this.platforms[i].position.y - this.player.height;
-          break;
-        } else {
-          this.playerCollision.active = false;
+      var _this2 = this;
+
+      var inresectingPlatforms = this.getInsersectingPlatforms();
+
+      if (inresectingPlatforms.length > 0) {
+        this.playerCollision.active = true;
+      } else {
+        this.playerCollision.active = false;
+      }
+
+      inresectingPlatforms.forEach(function (platform, i) {
+        if (_this2.objectCollide(_this2.player, platform)) {
+          //top
+          if (_this2.player.top < platform.bottom && _this2.player.top > platform.top && _this2.player.left < platform.right && _this2.player.right > platform.left) {
+            _this2.player.velocity.setY(0);
+
+            _this2.player.position.setY(platform.bottom); // console.log('top')
+
+          } //bottom
+
+
+          if (_this2.player.velocity.y > 0 && _this2.player.bottom >= platform.top && _this2.player.bottom < platform.top + _this2.player.velocity.getY && _this2.player.left < platform.right && _this2.player.right > platform.left) {
+            _this2.player.isOnGround = true;
+
+            _this2.player.position.setY(platform.top - _this2.player.height); // console.log('bottom');
+
+          } //left
+
+
+          if (_this2.player.left < platform.right && _this2.player.right > platform.right && _this2.player.bottom > platform.top && _this2.player.top < platform.bottom) {
+            _this2.player.velocity.setX(0);
+
+            _this2.player.position.setX(platform.right + 1); // console.log('left');
+
+          } //right
+
+
+          if (_this2.player.right > platform.left && _this2.player.left < platform.left && _this2.player.bottom > platform.top && _this2.player.top < platform.bottom) {
+            _this2.player.velocity.setX(0);
+
+            _this2.player.position.setX(platform.left - _this2.player.width - 1); // console.log('right');
+
+          }
         }
+      });
+    }
+  }, {
+    key: "worldBoundriesCollision",
+    value: function worldBoundriesCollision() {
+      // Left
+      if (this.player.left <= this.position.x) {
+        this.player.position.setX(0);
+      } // Right
+
+
+      if (this.player.right >= this.width) {
+        this.player.position.setX(this.width - this.player.width);
+      } // Bottom
+
+
+      if (this.player.bottom >= this.height) {
+        this.player.position.setY(this.height - this.player.height);
       }
     }
   }, {
@@ -641,27 +763,37 @@ function () {
     value: function renderPlatforms(ctx) {
       this.platforms.forEach(function (platform) {
         ctx.fillStyle = platform.color;
-        ctx.fillRect(platform.position.x, platform.position.y, platform.width, platform.height);
+        ctx.fillRect(platform.position.getX, platform.position.getY, platform.width, platform.height);
       });
+    }
+  }, {
+    key: "updateDebugText",
+    value: function updateDebugText() {
+      _index__WEBPACK_IMPORTED_MODULE_3__["isOnGroundEl"].innerText = this.player.isOnGround;
+      _index__WEBPACK_IMPORTED_MODULE_3__["playerVelY"].innerText = this.player.velocity.getY;
+      _index__WEBPACK_IMPORTED_MODULE_3__["playerVelX"].innerText = this.player.velocity.getX;
+      _index__WEBPACK_IMPORTED_MODULE_3__["playerPosY"].innerText = this.player.position.getY;
+      _index__WEBPACK_IMPORTED_MODULE_3__["playerPosX"].innerText = this.player.position.getX;
     }
   }, {
     key: "update",
     value: function update() {
       this.player.update();
-      this.playerCollideAll(); // this.playerCollideBottom();
+      this.playerCollideAll();
+      this.worldBoundriesCollision();
+      this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
 
-      this.playerCollideTop();
+      if (this.debug) {
+        this.gravity = 0;
+      } // Gravity
 
-      if (this.playerCollision.active) {
-        // console.log('colliding!');
-        this.player.velocity.y = 0;
+
+      if (this.playerCollision.active && this.player.isOnGround) {
+        this.player.velocity.setY(0);
       } else {
-        // console.log('not!');
-        this.player.velocity.y += this.gravity;
-      } // console.log(this.playerCollision.active);
-      // console.log(this.playerCollision.bottom.active);
-      // console.log(this.player.velocity.x);
-
+        this.player.isOnGround = false;
+        this.player.velocity.setY(this.player.velocity.getY + this.gravity);
+      }
     }
   }, {
     key: "render",
@@ -679,77 +811,38 @@ function () {
 
 /***/ }),
 
-/***/ "./src/es/debug.js":
-/*!*************************!*\
-  !*** ./src/es/debug.js ***!
-  \*************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Debug; });
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Debug =
-/*#__PURE__*/
-function () {
-  function Debug() {
-    _classCallCheck(this, Debug);
-
-    this.on = false;
-  }
-
-  _createClass(Debug, [{
-    key: "moveObject",
-    value: function moveObject(obj) {
-      var mouseX = 0;
-      var mouseY = 0;
-      window.addEventListener('mousemove', function (event) {
-        mouseX = event.clientX;
-        mouseY = event.clientY;
-        console.log(event.clientX);
-      });
-    }
-  }]);
-
-  return Debug;
-}();
-
-
-
-/***/ }),
-
 /***/ "./src/es/index.js":
 /*!*************************!*\
   !*** ./src/es/index.js ***!
   \*************************/
-/*! exports provided: debug, controller */
+/*! exports provided: controller, isOnGroundEl, playerVelY, playerVelX, playerPosY, playerPosX */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debug", function() { return debug; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "controller", function() { return controller; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isOnGroundEl", function() { return isOnGroundEl; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerVelY", function() { return playerVelY; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerVelX", function() { return playerVelX; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerPosY", function() { return playerPosY; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerPosX", function() { return playerPosX; });
 /* harmony import */ var _sass_style_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sass/style.scss */ "./src/sass/style.scss");
 /* harmony import */ var _sass_style_scss__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_sass_style_scss__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Controller__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Controller */ "./src/es/Controller.js");
 /* harmony import */ var _Game__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Game */ "./src/es/Game.js");
 /* harmony import */ var _Engine__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Engine */ "./src/es/Engine.js");
-/* harmony import */ var _debug__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./debug */ "./src/es/debug.js");
 
 
 
 
-
-var debug = new _debug__WEBPACK_IMPORTED_MODULE_4__["default"](true);
 var controller = new _Controller__WEBPACK_IMPORTED_MODULE_1__["default"]();
 var game = new _Game__WEBPACK_IMPORTED_MODULE_2__["default"]();
 var engine = new _Engine__WEBPACK_IMPORTED_MODULE_3__["default"](game);
+var isOnGroundEl = document.getElementById('debug-text__is-on-ground');
+var playerVelY = document.getElementById('debug-text__player-vel-y');
+var playerVelX = document.getElementById('debug-text__player-vel-x');
+var playerPosY = document.getElementById('debug-text__player-pos-y');
+var playerPosX = document.getElementById('debug-text__player-pos-x');
 game.init();
 engine.start();
 window.addEventListener('keydown', function (event) {
@@ -757,15 +850,20 @@ window.addEventListener('keydown', function (event) {
 });
 window.addEventListener('keyup', function (event) {
   return controller.keyEvent(event);
-}); // debug
-// if (debug.state) {
-//     window.addEventListener('mousedown', event => {debug.mouseClick(event)});
-//     window.addEventListener('mouseup', event => {debug.mouseClick(event)});
-//     window.addEventListener('mousemove', event => {});
-// } else {
-//     // window.addEventListener("mousedown", handleMouseDown, true);
-//     window.addEventListener("mousemove", handleMouseDown, true);
-// }
+});
+
+if (game.debug) {
+  ['mousedown', 'mousemove'].forEach(function (eventName) {
+    game.canvas.addEventListener(eventName, function (event) {
+      if (event.buttons === 1) {
+        game.world.player.velocity.y = 0;
+        game.world.player.velocity.x = 0;
+        game.world.player.position.x = event.offsetX - game.world.player.width / 2;
+        game.world.player.position.y = event.offsetY - game.world.player.height / 2;
+      }
+    });
+  });
+}
 
 /***/ }),
 

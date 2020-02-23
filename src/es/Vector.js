@@ -3,4 +3,20 @@ export default class Vector2D {
         this.x = x,
         this.y = y
     }
+
+    get getX() {
+        return this.x;
+    }
+
+    get getY() {
+        return this.y;
+    }
+
+    setX(posX) {
+        this.x = posX;
+    }
+
+    setY(posY) {
+        this.y = posY;
+    }
 }

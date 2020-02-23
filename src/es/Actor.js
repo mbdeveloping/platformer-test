@@ -8,7 +8,8 @@ export default class Actor {
         this.position = new Vector2D(0, 0),
         this.velocity = new Vector2D(),
         this.jumpDistance = 25;
-        this.isOnGround = false;
+        this.isOnGround = false,
+        this.speed = 5
     }
 
     get left() {
@@ -27,21 +28,33 @@ export default class Actor {
         return this.position.y + this.height;
     }
 
-    move(direction) {
-        if (direction === -1) { 
-            this.velocity.x = -5;
-        } else {
-            this.velocity.x = 5;
-        } 
+    moveLeft() {
+        this.velocity.setX(-this.speed);
     }
 
-    stop() {
-        this.velocity.x = 0;
+    moveRight() {
+        this.velocity.setX(this.speed);
+    }
+
+    moveUp() {
+        this.velocity.setY(-this.speed);
+    }
+
+    moveDown() {
+        this.velocity.setY(this.speed);
+    }
+
+    stop(debug) {
+        this.velocity.setX(0);
+
+        if (debug) {
+            this.velocity.y = 0;
+        }
     }
 
     jump() {
         // console.log('jumping!');
-        this.velocity.y = -this.jumpDistance;
+        this.velocity.setY(-this.jumpDistance);
     }
 
     attack() {

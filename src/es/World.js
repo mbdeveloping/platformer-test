@@ -1,11 +1,14 @@
 import Vector2D from "./Vector";
 import Player from "./Player";
 import Platform from "./Platform";
+import {isOnGroundEl, playerVelY, playerVelX, playerPosY, playerPosX} from './index';
 
 export default class World {
-    constructor(width, height, canvasWidth, canvasHeight) {
+    constructor(width, height, canvasWidth, canvasHeight, debug) {
+        this.debug = debug,
         this.width = width,
         this.height = height,
+        this.position = new Vector2D(0, 0),
         this.canvasWidth = canvasWidth,
         this.canvasHeight = canvasHeight,
         this.gravity = 1,
@@ -18,10 +21,23 @@ export default class World {
         this.player = new Player(),
         this.playerCollision = {
             active: false,
-            top: {active: false},
-            bottom: {active: false},
-            left: {active: false},
-            right: {active: false}
+            activePlatformIndex: null,
+            top: {
+                active: false,
+                activePlatformIndex: null
+            },
+            bottom: {
+                active: false,
+                activePlatformIndex: null
+            },
+            left: {
+                active: false,
+                activePlatformIndex: null
+            },
+            right: {
+                active: false,
+                activePlatformIndex: null
+            }
         }
     }
 
@@ -29,46 +45,78 @@ export default class World {
         return Math.max(min0, max0) >= Math.min(min1, max1) && Math.min(min0, max0) <= Math.max(min1, max1);
     }
 
-    playerCollide(r0, r1) {
-        return this.rangeCollide(r0.position.x, r0.position.x + r0.width, r1.position.x, r1.position.x + r1.width) &&
-                this.rangeCollide(r0.position.y, r0.position.y + r0.height, r1.position.y, r1.position.y + r1.height);
+    objectCollide(obj1, obj2) {
+        return this.rangeCollide(obj1.left, obj1.right, obj2.left, obj2.right) && this.rangeCollide(obj1.top, obj1.bottom, obj2.top, obj2.bottom);
     }
 
-    playerCollideBottom() {
-        for (let i = 0; i < this.platforms.length; i++) {
+    getInsersectingPlatforms() {
+        let intersectingPlatforms = this.platforms.filter((platform) => {
+            if (this.objectCollide(this.player, platform)) {return true}
+        });
 
-            if (this.playerCollision.active && this.player.bottom >= this.platforms[i].top) {
-                this.playerCollision.bottom.active = true;
-                console.log('BOTTOM colliding!');
-                break;
-            } else {
-                this.playerCollision.bottom.active = false;
-            }
-        }
-    }
-
-    playerCollideTop() {
-        for (let i = 0; i < this.platforms.length; i++) {
-
-            if (this.playerCollision.active && this.player.top >= this.platforms[i].top && this.player.top <= this.platforms[i].bottom) {
-                console.log('TOP colliding!');
-                break;
-            }
-        }
+        return intersectingPlatforms;
     }
 
     playerCollideAll() {
-        for (let i = 0; i < this.platforms.length; i++) {
+        let inresectingPlatforms = this.getInsersectingPlatforms();
 
-            if (this.playerCollide(this.player, this.platforms[i])) {
-                this.playerCollision.active = true;
-                this.player.position.y = this.platforms[i].position.y - this.player.height;
-                break;
-            } else {
-                this.playerCollision.active = false;
+        if (inresectingPlatforms.length > 0) {
+            this.playerCollision.active = true;
+        } else {
+            this.playerCollision.active = false;
+        }
+
+        inresectingPlatforms.forEach((platform, i) => {
+            if (this.objectCollide(this.player, platform)) {
+
+                //top
+                if (this.player.top < platform.bottom  && this.player.top > platform.top && this.player.left < platform.right && this.player.right > platform.left) {
+                    this.player.velocity.setY(0);
+                    this.player.position.setY(platform.bottom);
+                    // console.log('top')
+                }
+
+                //bottom
+                if (this.player.velocity.y > 0 && this.player.bottom >= platform.top && this.player.bottom < platform.top + this.player.velocity.getY && this.player.left < platform.right && this.player.right > platform.left) {
+                    this.player.isOnGround = true;
+                    this.player.position.setY(platform.top - this.player.height);
+                    // console.log('bottom');
+                }
+
+                //left
+                if (this.player.left < platform.right && this.player.right > platform.right && this.player.bottom > platform.top && this.player.top < platform.bottom) {
+                    this.player.velocity.setX(0);
+                    this.player.position.setX(platform.right + 1);
+                    // console.log('left');
+                }
+
+                //right
+                if (this.player.right > platform.left && this.player.left < platform.left && this.player.bottom > platform.top && this.player.top < platform.bottom) {
+                    this.player.velocity.setX(0);
+                    this.player.position.setX(platform.left - this.player. width - 1);
+                    // console.log('right');
+                }
             }
+        });
+    }
+
+    worldBoundriesCollision() {
+        // Left
+        if (this.player.left <= this.position.x) {
+            this.player.position.setX(0);
+        }
+
+        // Right
+        if (this.player.right >= this.width) {
+            this.player.position.setX(this.width - this.player.width)
+        }
+
+        // Bottom
+        if (this.player.bottom >= this.height) {
+            this.player.position.setY(this.height - this.player.height);
         }
     }
+
 
     createSky(ctx) {
         ctx.fillStyle = 'skyblue';
@@ -78,28 +126,34 @@ export default class World {
     renderPlatforms(ctx) {
         this.platforms.forEach(platform => {
             ctx.fillStyle = platform.color;
-            ctx.fillRect(platform.position.x, platform.position.y, platform.width, platform.height);
+            ctx.fillRect(platform.position.getX, platform.position.getY, platform.width, platform.height);
         });
+    }
+
+    updateDebugText() {
+        isOnGroundEl.innerText = this.player.isOnGround;
+        playerVelY.innerText = this.player.velocity.getY;
+        playerVelX.innerText = this.player.velocity.getX;
+        playerPosY.innerText = this.player.position.getY;
+        playerPosX.innerText = this.player.position.getX;
     }
 
     update() {
         this.player.update();
         this.playerCollideAll();
-        // this.playerCollideBottom();
-        this.playerCollideTop();
+        this.worldBoundriesCollision();
+        this.updateDebugText();
+        // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
 
-        if (this.playerCollision.active) {
-            // console.log('colliding!');
-            this.player.velocity.y = 0;
+        if (this.debug) {this.gravity = 0}
+
+        // Gravity
+        if (this.playerCollision.active && this.player.isOnGround) {
+            this.player.velocity.setY(0);
         } else {
-            // console.log('not!');
-            this.player.velocity.y += this.gravity;
+            this.player.isOnGround = false;
+            this.player.velocity.setY(this.player.velocity.getY + this.gravity);
         }
-
-        // console.log(this.playerCollision.active);
-        // console.log(this.playerCollision.bottom.active);
-
-        // console.log(this.player.velocity.x);
     }
 
     render(ctx) {
