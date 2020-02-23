@@ -26,8 +26,8 @@ export default class Game {
             this.world.player.stop(this.debug);
         }
 
-        if (controller.jump.active && this.world.playerCollision.active) {
-            this.world.playerCollision.active = false;
+        if (controller.jump.active && this.world.player.isOnGround) {
+            this.world.player.isOnGround = false;
             this.world.player.jump();
         }
     }

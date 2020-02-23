@@ -7,6 +7,11 @@ import Engine from './Engine';
 export const controller = new Controller();
 const game = new Game();
 const engine = new Engine(game);
+export const isOnGroundEl = document.getElementById('debug-text__is-on-ground');
+export const playerVelY = document.getElementById('debug-text__player-vel-y');
+export const playerVelX = document.getElementById('debug-text__player-vel-x');
+export const playerPosY = document.getElementById('debug-text__player-pos-y');
+export const playerPosX = document.getElementById('debug-text__player-pos-x');
 
 game.init();
 engine.start();

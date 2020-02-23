@@ -385,8 +385,8 @@ function () {
         this.world.player.stop(this.debug);
       }
 
-      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].jump.active && this.world.playerCollision.active) {
-        this.world.playerCollision.active = false;
+      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].jump.active && this.world.player.isOnGround) {
+        this.world.player.isOnGround = false;
         this.world.player.jump();
       }
     }
@@ -623,11 +623,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector */ "./src/es/Vector.js");
 /* harmony import */ var _Player__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Player */ "./src/es/Player.js");
 /* harmony import */ var _Platform__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Platform */ "./src/es/Platform.js");
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./index */ "./src/es/index.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 
 
 
@@ -670,77 +672,65 @@ function () {
     key: "objectCollide",
     value: function objectCollide(obj1, obj2) {
       return this.rangeCollide(obj1.left, obj1.right, obj2.left, obj2.right) && this.rangeCollide(obj1.top, obj1.bottom, obj2.top, obj2.bottom);
-    } // playerCollideBottom(index) {
-    //     return this.player.bottom >= this.platforms[index].top && this.player.top < this.platforms[index].top;
-    // }
-    // playerCollideTop(index) {
-    //     return this.player.top <= this.platforms[index].bottom && this.player.bottom > this.platforms[index].bottom;
-    // }
-    // playerCollideLeft(index) {
-    //     return this.player.left <= this.platforms[index].right && this.player.right > this.platforms[index].right && this.player.bottom >= this.platforms[index].bottom;
-    // }
-    // playerCollideRight(index) {
-    //     return this.player.right >= this.platforms[index].left && this.player.left < this.platforms[index].left && this.player.bottom >= this.platforms[index].bottom;
-    // }
+    }
+  }, {
+    key: "getInsersectingPlatforms",
+    value: function getInsersectingPlatforms() {
+      var _this = this;
 
-  }, {
-    key: "setActiveTop",
-    value: function setActiveTop(bool, i) {
-      this.playerCollision.top.active = bool;
-      this.playerCollision.top.activePlatformIndex = i; // console.log('top', i);
+      var intersectingPlatforms = this.platforms.filter(function (platform) {
+        if (_this.objectCollide(_this.player, platform)) {
+          return true;
+        }
+      });
+      return intersectingPlatforms;
     }
-  }, {
-    key: "setActiveBottom",
-    value: function setActiveBottom(bool, i) {
-      this.playerCollision.bottom.active = bool;
-      this.playerCollision.bottom.activePlatformIndex = i; // console.log('bottom', i);
-    }
-  }, {
-    key: "setActiveLeft",
-    value: function setActiveLeft(bool, i) {
-      this.playerCollision.left.active = bool;
-      this.playerCollision.left.activePlatformIndex = i; // console.log('left', i);
-    }
-  }, {
-    key: "setActiveRight",
-    value: function setActiveRight(bool, i) {
-      this.playerCollision.right.active = bool;
-      this.playerCollision.right.activePlatformIndex = i; // console.log('right', i);
-    } // Checks if player collides with any platform and breaks the loop and returns true when it finds first collision
-
   }, {
     key: "playerCollideAll",
     value: function playerCollideAll() {
-      var _this = this;
+      var _this2 = this;
 
-      // for (let i = 0; i < this.platforms.length; i++) {
-      //     if (this.objectCollide(this.player, this.platforms[i])) {
-      //         // this.playerCollision.active = true;
-      //         // this.playerCollision.activePlatformIndex = i;
-      //         break;
-      //     } else {
-      //         // this.playerCollision.active = false;
-      //         // this.playerCollision.activePlatformIndex = null;
-      //     }
-      // }
-      this.platforms.forEach(function (platform, i) {
-        var player = _this.player;
+      var inresectingPlatforms = this.getInsersectingPlatforms();
 
-        if (_this.objectCollide(player, platform)) {
-          platform.color = 'brown'; //@todo tt rm
+      if (inresectingPlatforms.length > 0) {
+        this.playerCollision.active = true;
+      } else {
+        this.playerCollision.active = false;
+      }
 
-          _this.playerCollision.active = true; // bottom
+      inresectingPlatforms.forEach(function (platform, i) {
+        if (_this2.objectCollide(_this2.player, platform)) {
+          //top
+          if (_this2.player.top < platform.bottom && _this2.player.top > platform.top && _this2.player.left < platform.right && _this2.player.right > platform.left) {
+            _this2.player.velocity.setY(0);
 
-          if (_this.rangeCollide(player.top, player.bottom, platform.top, platform.bottom)) {
-            _this.setActiveBottom(true, i);
-          } else {
-            _this.setActiveBottom(false, null);
-          } //
+            _this2.player.position.setY(platform.bottom); // console.log('top')
 
-        } else {
-          platform.color = 'black'; //@todo tt rm
+          } //bottom
 
-          _this.playerCollision.active = false;
+
+          if (_this2.player.velocity.y > 0 && _this2.player.bottom >= platform.top && _this2.player.bottom < platform.top + _this2.player.velocity.getY && _this2.player.left < platform.right && _this2.player.right > platform.left) {
+            _this2.player.isOnGround = true;
+
+            _this2.player.position.setY(platform.top - _this2.player.height); // console.log('bottom');
+
+          } //left
+
+
+          if (_this2.player.left < platform.right && _this2.player.right > platform.right && _this2.player.bottom > platform.top && _this2.player.top < platform.bottom) {
+            _this2.player.velocity.setX(0);
+
+            _this2.player.position.setX(platform.right + 1); // console.log('left');
+
+          } //right
+
+
+          if (_this2.player.right > platform.left && _this2.player.left < platform.left && _this2.player.bottom > platform.top && _this2.player.top < platform.bottom) {
+            _this2.player.velocity.setX(0);
+
+            _this2.player.position.setX(platform.left - _this2.player.width - 1); // console.log('right');
+
+          }
         }
       });
     }
@@ -759,20 +749,9 @@ function () {
 
 
       if (this.player.bottom >= this.height) {
-        this.player.position.setY(this.height - this.player.height); // this.playerCollision.active = true;
-      } else {// this.playerCollision.active = false;
-        }
-    } // ttCollide() {
-    //     let arrOfCollidedPlatforms = this.platforms.filter((platform, i) => {
-    //         if (this.objectCollide(this.player, platform)) {
-    //             return true;
-    //         }
-    //     });
-    //     arrOfCollidedPlatforms.forEach((platform, i) => {
-    //         console.log(i);
-    //     });
-    // }
-
+        this.player.position.setY(this.height - this.player.height);
+      }
+    }
   }, {
     key: "createSky",
     value: function createSky(ctx) {
@@ -788,52 +767,33 @@ function () {
       });
     }
   }, {
+    key: "updateDebugText",
+    value: function updateDebugText() {
+      _index__WEBPACK_IMPORTED_MODULE_3__["isOnGroundEl"].innerText = this.player.isOnGround;
+      _index__WEBPACK_IMPORTED_MODULE_3__["playerVelY"].innerText = this.player.velocity.getY;
+      _index__WEBPACK_IMPORTED_MODULE_3__["playerVelX"].innerText = this.player.velocity.getX;
+      _index__WEBPACK_IMPORTED_MODULE_3__["playerPosY"].innerText = this.player.position.getY;
+      _index__WEBPACK_IMPORTED_MODULE_3__["playerPosX"].innerText = this.player.position.getX;
+    }
+  }, {
     key: "update",
     value: function update() {
       this.player.update();
       this.playerCollideAll();
-      this.worldBoundriesCollision(); // this.ttCollide();
-      // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
+      this.worldBoundriesCollision();
+      this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
 
       if (this.debug) {
         this.gravity = 0;
       } // Gravity
 
 
-      if (this.playerCollision.active) {
+      if (this.playerCollision.active && this.player.isOnGround) {
         this.player.velocity.setY(0);
       } else {
+        this.player.isOnGround = false;
         this.player.velocity.setY(this.player.velocity.getY + this.gravity);
-      } // Y position
-      // Bottom
-
-
-      if (this.playerCollision.active && this.playerCollision.bottom.active) {
-        this.player.position.setY(this.platforms[this.playerCollision.bottom.activePlatformIndex].top - this.player.height);
-      } // Top
-
-
-      if (this.playerCollision.active && this.playerCollision.top.active) {
-        this.player.position.setY(this.platforms[this.playerCollision.top.activePlatformIndex].bottom);
-        this.player.velocity.setY(this.player.velocity.getY + this.gravity); // console.log('top');
-      } // X position
-      // Left
-
-
-      if (this.playerCollision.active && this.playerCollision.left.active) {
-        this.player.position.setX(this.platforms[this.playerCollision.left.activePlatformIndex].right + 1); // console.log('left');
-      } // Right
-
-
-      if (this.playerCollision.active && this.playerCollision.right.active) {
-        this.player.position.setX(this.platforms[this.playerCollision.right.activePlatformIndex].left - this.player.width - 1); // console.log('right');
-      } // console.log(this.player.position.getY);
-      // console.log(this.player.velocity.getY);
-      // console.log(this.player.velocity.getX);
-      // console.log(this.playerCollision.bottom.active);
-
-
-      console.log(this.playerCollision.active);
+      }
     }
   }, {
     key: "render",
@@ -855,12 +815,17 @@ function () {
 /*!*************************!*\
   !*** ./src/es/index.js ***!
   \*************************/
-/*! exports provided: controller */
+/*! exports provided: controller, isOnGroundEl, playerVelY, playerVelX, playerPosY, playerPosX */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "controller", function() { return controller; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isOnGroundEl", function() { return isOnGroundEl; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerVelY", function() { return playerVelY; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerVelX", function() { return playerVelX; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerPosY", function() { return playerPosY; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerPosX", function() { return playerPosX; });
 /* harmony import */ var _sass_style_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sass/style.scss */ "./src/sass/style.scss");
 /* harmony import */ var _sass_style_scss__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_sass_style_scss__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _Controller__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Controller */ "./src/es/Controller.js");
@@ -873,6 +838,11 @@ __webpack_require__.r(__webpack_exports__);
 var controller = new _Controller__WEBPACK_IMPORTED_MODULE_1__["default"]();
 var game = new _Game__WEBPACK_IMPORTED_MODULE_2__["default"]();
 var engine = new _Engine__WEBPACK_IMPORTED_MODULE_3__["default"](game);
+var isOnGroundEl = document.getElementById('debug-text__is-on-ground');
+var playerVelY = document.getElementById('debug-text__player-vel-y');
+var playerVelX = document.getElementById('debug-text__player-vel-x');
+var playerPosY = document.getElementById('debug-text__player-pos-y');
+var playerPosX = document.getElementById('debug-text__player-pos-x');
 game.init();
 engine.start();
 window.addEventListener('keydown', function (event) {

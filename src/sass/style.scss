@@ -8,3 +8,18 @@ canvas {
     display: block;
     margin: 0 auto;
 }
+
+.debug-text {
+    position: absolute;
+    right: 50px;
+    top: 0;
+
+    ul {
+        padding: 0 50px;
+        list-style-type: none;
+    }
+
+    span {
+        color: red;
+    }
+}
