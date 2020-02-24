@@ -694,27 +694,7 @@ function () {
   function World(width, height, canvasWidth, canvasHeight, debug) {
     _classCallCheck(this, World);
 
-    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), // this.playerCollision = {
-    //     active: false,
-    //     activePlatformIndex: null,
-    //     top: {
-    //         active: false,
-    //         activePlatformIndex: null
-    //     },
-    //     bottom: {
-    //         active: false,
-    //         activePlatformIndex: null
-    //     },
-    //     left: {
-    //         active: false,
-    //         activePlatformIndex: null
-    //     },
-    //     right: {
-    //         active: false,
-    //         activePlatformIndex: null
-    //     }
-    // },
-    this.actors = [this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.enemy = new _Enemy__WEBPACK_IMPORTED_MODULE_4__["default"](500, 0)];
+    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.actors = [this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.enemy = new _Enemy__WEBPACK_IMPORTED_MODULE_4__["default"](500, 0)];
   }
 
   _createClass(World, [{
@@ -756,10 +736,8 @@ function () {
         if (_this2.objectCollide(actor, platform)) {
           //top
           if (actor.top < platform.bottom && actor.top > platform.top && actor.left < platform.right && actor.right > platform.left) {
-            _this2.player.velocity.setY(0);
-
-            _this2.player.position.setY(platform.bottom); // console.log('top')
-
+            actor.velocity.setY(0);
+            actor.position.setY(platform.bottom); // console.log('top')
           } //bottom
 
 
@@ -784,20 +762,20 @@ function () {
     }
   }, {
     key: "worldBoundriesCollision",
-    value: function worldBoundriesCollision() {
+    value: function worldBoundriesCollision(actor) {
       // Left
-      if (this.player.left <= this.position.x) {
-        this.player.position.setX(0);
+      if (actor.left <= this.position.x) {
+        actor.position.setX(0);
       } // Right
 
 
-      if (this.player.right >= this.width) {
-        this.player.position.setX(this.width - this.player.width);
+      if (actor.right >= this.width) {
+        actor.position.setX(this.width - actor.width);
       } // Bottom
 
 
-      if (this.player.bottom >= this.height) {
-        this.player.position.setY(this.height - this.player.height);
+      if (actor.bottom >= this.height) {
+        actor.position.setY(this.height - actor.height);
       }
     }
   }, {
@@ -828,25 +806,18 @@ function () {
     value: function update() {
       var _this3 = this;
 
-      this.enemy.update();
-      this.player.update(); // this.playerCollideAll();
-
       this.actors.forEach(function (actor) {
+        actor.update();
+
         _this3.playerCollideAll(actor);
+
+        _this3.worldBoundriesCollision(actor);
       });
-      this.worldBoundriesCollision();
       this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
 
       if (this.debug) {
         this.gravity = 0;
-      } // Gravity
-      // if (this.playerCollision.active && this.player.isOnGround) {
-      //     this.player.velocity.setY(0);
-      // } else {
-      //     this.player.isOnGround = false;
-      //     this.player.velocity.setY(this.player.velocity.getY + this.gravity);
-      // }
-
+      }
 
       this.actors.forEach(function (actor) {
         if (actor.isColliding && actor.isOnGround) {
@@ -862,8 +833,9 @@ function () {
     value: function render(ctx) {
       this.createSky(ctx);
       this.renderPlatforms(ctx);
-      this.player.render(ctx);
-      this.enemy.render(ctx);
+      this.actors.forEach(function (actor) {
+        actor.render(ctx);
+      });
     }
   }]);
 
