@@ -111,8 +111,12 @@ function () {
   function Actor() {
     _classCallCheck(this, Actor);
 
-    this.height = 100, this.width = 50, this.color = 'black', this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.velocity = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](), this.jumpDistance = 25;
-    this.isOnGround = false, this.isColliding = false, this.speed = 5;
+    this.type = 'npc', this.height = 100, this.width = 50, this.color = 'black', this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.velocity = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](), this.jumpDistance = 25;
+    this.isOnGround = false, this.isColliding = false, this.isCollidingRight = false; //tt
+
+    this.isCollidginLeft = false; //tt
+
+    this.speed = 5;
   }
 
   _createClass(Actor, [{
@@ -230,6 +234,8 @@ function () {
       active: false
     }, this.down = {
       active: false
+    }, this.attack = {
+      active: false
     };
   }
 
@@ -248,17 +254,25 @@ function () {
           break;
 
         case 32:
-          event.type === 'keydown' ? this.jump.active = true : this.jump.active = false;
-        //SPACE
+          event.type === 'keydown' ? this.jump.active = true : this.jump.active = false; //SPACE
+
+          break;
+
+        case 13:
+          event.type === 'keydown' ? this.attack.active = true : this.attack.active = false; //ENTER
+
+          break;
         //debug
 
         case 87:
-          event.type === 'keydown' ? this.up.active = true : this.up.active = false;
-        //W
+          event.type === 'keydown' ? this.up.active = true : this.up.active = false; //W
+
+          break;
 
         case 83:
-          event.type === 'keydown' ? this.down.active = true : this.down.active = false;
-        //W
+          event.type === 'keydown' ? this.down.active = true : this.down.active = false; //W
+
+          break;
       }
     }
   }]);
@@ -286,6 +300,10 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
@@ -310,9 +328,46 @@ function (_Actor) {
     _classCallCheck(this, Enemy);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Enemy).call(this));
-    _this.color = 'blue', _this.position = new _Vector__WEBPACK_IMPORTED_MODULE_1__["default"](posX, posY);
+    _this.color = 'blue', _this.position = new _Vector__WEBPACK_IMPORTED_MODULE_1__["default"](posX, posY), //enemy specific
+    _this.speed = 1, _this.isOnCombat = false, _this.ai = {
+      isOnCombat: false,
+      isMoving: false
+    };
     return _this;
   }
+
+  _createClass(Enemy, [{
+    key: "patrol",
+    value: function patrol() {
+      var randomDesision = Math.random() < 0.5 ? -1 : 1;
+
+      if (!this.isOnCombat) {
+        if (this.isColliding) {
+          if (!this.ai.isMoving) {
+            //if not moving, make enemy move randomly left or right
+            this.ai.isMoving = true;
+
+            if (randomDesision > 0) {
+              this.moveRight();
+            } else {
+              this.moveLeft();
+            }
+          } else {
+            //if enemy is already moving
+            if (this.isCollidingRight) {
+              this.moveLeft();
+            }
+
+            if (this.isCollidingLeft) {
+              this.moveRight();
+            }
+          }
+        } // console.log(this.isCollidingRight);
+        // console.log(this.isCollidingLeft);
+
+      }
+    }
+  }]);
 
   return Enemy;
 }(_Actor__WEBPACK_IMPORTED_MODULE_0__["default"]);
@@ -421,8 +476,8 @@ function () {
 
   _createClass(Game, [{
     key: "update",
-    value: function update() {
-      this.world.update();
+    value: function update(step) {
+      this.world.update(); //movements
 
       if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active) {
         this.world.player.moveLeft();
@@ -434,6 +489,11 @@ function () {
         this.world.player.moveDown();
       } else {
         this.world.player.stop(this.debug);
+      } //attack
+
+
+      if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].attack.active) {
+        this.world.player.attack();
       }
 
       if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].jump.active && this.world.player.isOnGround) {
@@ -593,7 +653,7 @@ function (_Actor) {
     _classCallCheck(this, Player);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Player).call(this));
-    _this.color = 'red';
+    _this.type = 'player', _this.color = 'red';
     return _this;
   }
 
@@ -694,7 +754,7 @@ function () {
   function World(width, height, canvasWidth, canvasHeight, debug) {
     _classCallCheck(this, World);
 
-    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.actors = [this.player, this.enemy = new _Enemy__WEBPACK_IMPORTED_MODULE_4__["default"](500, 0)];
+    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.actors = [new _Enemy__WEBPACK_IMPORTED_MODULE_4__["default"](500, 0), this.player], this.enemies = [this.actors[0]];
   }
 
   _createClass(World, [{
@@ -706,6 +766,22 @@ function () {
     key: "objectCollide",
     value: function objectCollide(obj1, obj2) {
       return this.rangeCollide(obj1.left, obj1.right, obj2.left, obj2.right) && this.rangeCollide(obj1.top, obj1.bottom, obj2.top, obj2.bottom);
+    }
+  }, {
+    key: "objectCollideRight",
+    value: function objectCollideRight(actor, platform) {
+      //tt
+      if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
+        return true;
+      }
+    }
+  }, {
+    key: "objectCollideLeft",
+    value: function objectCollideLeft(actor, platform) {
+      //tt
+      if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
+        return true;
+      }
     }
   }, {
     key: "getInsersectingPlatforms",
@@ -720,8 +796,8 @@ function () {
       return intersectingPlatforms;
     }
   }, {
-    key: "playerCollideAll",
-    value: function playerCollideAll(actor) {
+    key: "actorWorldCollision",
+    value: function actorWorldCollision(actor) {
       var _this2 = this;
 
       var inresectingPlatforms = this.getInsersectingPlatforms(actor);
@@ -748,14 +824,27 @@ function () {
 
 
           if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
-            actor.velocity.setX(0);
-            actor.position.setX(platform.right + 1); // console.log('left');
+            actor.isCollidingLeft = true;
+
+            if (actor.type === 'player') {
+              actor.velocity.setX(0);
+              actor.position.setX(platform.right + 1); // console.log('left');
+            }
+          } else {
+            actor.isCollidingLeft = false;
           } //right
 
 
           if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
-            actor.velocity.setX(0);
-            actor.position.setX(platform.left - actor.width - 1); // console.log('right');
+            // console.log('right');
+            actor.isCollidingRight = true;
+
+            if (actor.type === 'player') {
+              actor.velocity.setX(0);
+              actor.position.setX(platform.left - actor.width - 1);
+            }
+          } else {
+            actor.isCollidingRight = false;
           }
         }
       });
@@ -809,11 +898,10 @@ function () {
       this.actors.forEach(function (actor) {
         actor.update();
 
-        _this3.playerCollideAll(actor);
+        _this3.actorWorldCollision(actor);
 
         _this3.worldBoundriesCollision(actor);
       });
-      this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
 
       if (this.debug) {
         this.gravity = 0;
@@ -827,6 +915,10 @@ function () {
           actor.velocity.setY(actor.velocity.getY + _this3.gravity);
         }
       });
+      this.enemies.forEach(function (enemy) {
+        enemy.patrol();
+      });
+      this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
     }
   }, {
     key: "render",

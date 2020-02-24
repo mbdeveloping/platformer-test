@@ -11,9 +11,10 @@ export default class Game {
         this.world = new World(this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight, this.debug)
     }
 
-    update() {
+    update(step) {
         this.world.update();
         
+        //movements
         if (controller.left.active) {
             this.world.player.moveLeft();
         } else if (controller.right.active) {
@@ -24,6 +25,11 @@ export default class Game {
             this.world.player.moveDown();
         } else {
             this.world.player.stop(this.debug);
+        }
+
+        //attack
+        if (controller.attack.active) {
+            this.world.player.attack();
         }
 
         if (controller.jump.active && this.world.player.isOnGround) {

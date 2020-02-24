@@ -21,8 +21,11 @@ export default class World {
         ],
         this.player = new Player(),
         this.actors = [
-            this.player,
-            this.enemy = new Enemy(500, 0)
+            new Enemy(500, 0),
+            this.player
+        ],
+        this.enemies = [
+            this.actors[0]
         ]
     }
 
@@ -34,6 +37,18 @@ export default class World {
         return this.rangeCollide(obj1.left, obj1.right, obj2.left, obj2.right) && this.rangeCollide(obj1.top, obj1.bottom, obj2.top, obj2.bottom);
     }
 
+    objectCollideRight(actor, platform) { //tt
+        if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
+           return true;
+        }
+    }
+
+    objectCollideLeft(actor, platform) { //tt
+        if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
+            return true;
+        }
+    }
+
     getInsersectingPlatforms(actor) {
         let intersectingPlatforms = this.platforms.filter((platform) => {
             if (this.objectCollide(actor, platform)) {return true}
@@ -42,7 +57,7 @@ export default class World {
         return intersectingPlatforms;
     }
 
-    playerCollideAll(actor) {
+    actorWorldCollision(actor) {
         let inresectingPlatforms = this.getInsersectingPlatforms(actor);
 
         if (inresectingPlatforms.length > 0) {
@@ -70,16 +85,28 @@ export default class World {
 
                 //left
                 if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
-                    actor.velocity.setX(0);
-                    actor.position.setX(platform.right + 1);
-                    // console.log('left');
+                    actor.isCollidingLeft = true;
+
+                    if (actor.type === 'player') {
+                        actor.velocity.setX(0);
+                        actor.position.setX(platform.right + 1);
+                        // console.log('left');
+                    }
+                } else {
+                    actor.isCollidingLeft = false;
                 }
 
                 //right
                 if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
-                    actor.velocity.setX(0);
-                    actor.position.setX(platform.left - actor. width - 1);
                     // console.log('right');
+                    actor.isCollidingRight = true;
+
+                    if (actor.type === 'player') {
+                        actor.velocity.setX(0);
+                        actor.position.setX(platform.left - actor.width - 1); 
+                    }
+                } else {
+                    actor.isCollidingRight = false;
                 }
             }
         });
@@ -101,7 +128,6 @@ export default class World {
             actor.position.setY(this.height - actor.height);
         }
     }
-
 
     createSky(ctx) {
         ctx.fillStyle = 'skyblue';
@@ -126,14 +152,12 @@ export default class World {
     update() {
         this.actors.forEach(actor => {
             actor.update();
-            this.playerCollideAll(actor);
+            this.actorWorldCollision(actor);
             this.worldBoundriesCollision(actor);
         });
         
-        this.updateDebugText();
-        // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
-
         if (this.debug) {this.gravity = 0}
+
         this.actors.forEach(actor => {
             if (actor.isColliding && actor.isOnGround) {
                 actor.velocity.setY(0);
@@ -142,6 +166,13 @@ export default class World {
                 actor.velocity.setY(actor.velocity.getY + this.gravity);
             }
         });
+
+        this.enemies.forEach(enemy => {
+            enemy.patrol();
+        });
+
+        this.updateDebugText();
+        // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
     }
 
     render(ctx) {
