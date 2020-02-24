@@ -21,7 +21,7 @@ export default class World {
         ],
         this.player = new Player(),
         this.actors = [
-            this.player = new Player(),
+            this.player,
             this.enemy = new Enemy(500, 0)
         ]
     }

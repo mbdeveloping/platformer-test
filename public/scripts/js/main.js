@@ -694,7 +694,7 @@ function () {
   function World(width, height, canvasWidth, canvasHeight, debug) {
     _classCallCheck(this, World);
 
-    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.actors = [this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.enemy = new _Enemy__WEBPACK_IMPORTED_MODULE_4__["default"](500, 0)];
+    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.actors = [this.player, this.enemy = new _Enemy__WEBPACK_IMPORTED_MODULE_4__["default"](500, 0)];
   }
 
   _createClass(World, [{
