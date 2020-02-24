@@ -112,7 +112,7 @@ function () {
     _classCallCheck(this, Actor);
 
     this.height = 100, this.width = 50, this.color = 'black', this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.velocity = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](), this.jumpDistance = 25;
-    this.isOnGround = false, this.speed = 5;
+    this.isOnGround = false, this.isColliding = false, this.speed = 5;
   }
 
   _createClass(Actor, [{
@@ -281,6 +281,7 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Enemy; });
 /* harmony import */ var _Actor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Actor */ "./src/es/Actor.js");
+/* harmony import */ var _Vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vector */ "./src/es/Vector.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -297,18 +298,19 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+
 var Enemy =
 /*#__PURE__*/
 function (_Actor) {
   _inherits(Enemy, _Actor);
 
-  function Enemy() {
+  function Enemy(posX, posY) {
     var _this;
 
     _classCallCheck(this, Enemy);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Enemy).call(this));
-    _this.color = 'blue';
+    _this.color = 'blue', _this.position = new _Vector__WEBPACK_IMPORTED_MODULE_1__["default"](posX, posY);
     return _this;
   }
 
@@ -692,26 +694,27 @@ function () {
   function World(width, height, canvasWidth, canvasHeight, debug) {
     _classCallCheck(this, World);
 
-    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.playerCollision = {
-      active: false,
-      activePlatformIndex: null,
-      top: {
-        active: false,
-        activePlatformIndex: null
-      },
-      bottom: {
-        active: false,
-        activePlatformIndex: null
-      },
-      left: {
-        active: false,
-        activePlatformIndex: null
-      },
-      right: {
-        active: false,
-        activePlatformIndex: null
-      }
-    }, this.enemy = new _Enemy__WEBPACK_IMPORTED_MODULE_4__["default"](0, 0);
+    this.debug = debug, this.width = width, this.height = height, this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.canvasWidth = canvasWidth, this.canvasHeight = canvasHeight, this.gravity = 1, this.platforms = [new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](this.width, 50, 0, this.height - 50), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 0, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, this.width - 300, this.height - 100), new _Platform__WEBPACK_IMPORTED_MODULE_2__["default"](300, 50, 400, 350)], this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), // this.playerCollision = {
+    //     active: false,
+    //     activePlatformIndex: null,
+    //     top: {
+    //         active: false,
+    //         activePlatformIndex: null
+    //     },
+    //     bottom: {
+    //         active: false,
+    //         activePlatformIndex: null
+    //     },
+    //     left: {
+    //         active: false,
+    //         activePlatformIndex: null
+    //     },
+    //     right: {
+    //         active: false,
+    //         activePlatformIndex: null
+    //     }
+    // },
+    this.actors = [this.player = new _Player__WEBPACK_IMPORTED_MODULE_1__["default"](), this.enemy = new _Enemy__WEBPACK_IMPORTED_MODULE_4__["default"](500, 0)];
   }
 
   _createClass(World, [{
@@ -726,11 +729,11 @@ function () {
     }
   }, {
     key: "getInsersectingPlatforms",
-    value: function getInsersectingPlatforms() {
+    value: function getInsersectingPlatforms(actor) {
       var _this = this;
 
       var intersectingPlatforms = this.platforms.filter(function (platform) {
-        if (_this.objectCollide(_this.player, platform)) {
+        if (_this.objectCollide(actor, platform)) {
           return true;
         }
       });
@@ -738,21 +741,21 @@ function () {
     }
   }, {
     key: "playerCollideAll",
-    value: function playerCollideAll() {
+    value: function playerCollideAll(actor) {
       var _this2 = this;
 
-      var inresectingPlatforms = this.getInsersectingPlatforms();
+      var inresectingPlatforms = this.getInsersectingPlatforms(actor);
 
       if (inresectingPlatforms.length > 0) {
-        this.playerCollision.active = true;
+        actor.isColliding = true;
       } else {
-        this.playerCollision.active = false;
+        actor.isColliding = false;
       }
 
       inresectingPlatforms.forEach(function (platform, i) {
-        if (_this2.objectCollide(_this2.player, platform)) {
+        if (_this2.objectCollide(actor, platform)) {
           //top
-          if (_this2.player.top < platform.bottom && _this2.player.top > platform.top && _this2.player.left < platform.right && _this2.player.right > platform.left) {
+          if (actor.top < platform.bottom && actor.top > platform.top && actor.left < platform.right && actor.right > platform.left) {
             _this2.player.velocity.setY(0);
 
             _this2.player.position.setY(platform.bottom); // console.log('top')
@@ -760,27 +763,21 @@ function () {
           } //bottom
 
 
-          if (_this2.player.velocity.y > 0 && _this2.player.bottom >= platform.top && _this2.player.bottom < platform.top + _this2.player.velocity.getY && _this2.player.left < platform.right && _this2.player.right > platform.left) {
-            _this2.player.isOnGround = true;
-
-            _this2.player.position.setY(platform.top - _this2.player.height); // console.log('bottom');
-
+          if (actor.velocity.y > 0 && actor.bottom >= platform.top && actor.bottom < platform.top + actor.velocity.getY && actor.left < platform.right && actor.right > platform.left) {
+            actor.isOnGround = true;
+            actor.position.setY(platform.top - actor.height); // console.log('bottom');
           } //left
 
 
-          if (_this2.player.left < platform.right && _this2.player.right > platform.right && _this2.player.bottom > platform.top && _this2.player.top < platform.bottom) {
-            _this2.player.velocity.setX(0);
-
-            _this2.player.position.setX(platform.right + 1); // console.log('left');
-
+          if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
+            actor.velocity.setX(0);
+            actor.position.setX(platform.right + 1); // console.log('left');
           } //right
 
 
-          if (_this2.player.right > platform.left && _this2.player.left < platform.left && _this2.player.bottom > platform.top && _this2.player.top < platform.bottom) {
-            _this2.player.velocity.setX(0);
-
-            _this2.player.position.setX(platform.left - _this2.player.width - 1); // console.log('right');
-
+          if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
+            actor.velocity.setX(0);
+            actor.position.setX(platform.left - actor.width - 1); // console.log('right');
           }
         }
       });
@@ -829,23 +826,36 @@ function () {
   }, {
     key: "update",
     value: function update() {
+      var _this3 = this;
+
       this.enemy.update();
-      this.player.update();
-      this.playerCollideAll();
+      this.player.update(); // this.playerCollideAll();
+
+      this.actors.forEach(function (actor) {
+        _this3.playerCollideAll(actor);
+      });
       this.worldBoundriesCollision();
       this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
 
       if (this.debug) {
         this.gravity = 0;
       } // Gravity
+      // if (this.playerCollision.active && this.player.isOnGround) {
+      //     this.player.velocity.setY(0);
+      // } else {
+      //     this.player.isOnGround = false;
+      //     this.player.velocity.setY(this.player.velocity.getY + this.gravity);
+      // }
 
 
-      if (this.playerCollision.active && this.player.isOnGround) {
-        this.player.velocity.setY(0);
-      } else {
-        this.player.isOnGround = false;
-        this.player.velocity.setY(this.player.velocity.getY + this.gravity);
-      }
+      this.actors.forEach(function (actor) {
+        if (actor.isColliding && actor.isOnGround) {
+          actor.velocity.setY(0);
+        } else {
+          actor.isOnGround = false;
+          actor.velocity.setY(actor.velocity.getY + _this3.gravity);
+        }
+      });
     }
   }, {
     key: "render",

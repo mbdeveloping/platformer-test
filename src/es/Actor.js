@@ -9,6 +9,7 @@ export default class Actor {
         this.velocity = new Vector2D(),
         this.jumpDistance = 25;
         this.isOnGround = false,
+        this.isColliding = false,
         this.speed = 5
     }
 
