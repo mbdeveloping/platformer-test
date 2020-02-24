@@ -2,6 +2,7 @@ import Vector2D from './Vector';
 
 export default class Actor {
     constructor() {
+        this.type = 'npc',
         this.height = 100,
         this.width = 50,
         this.color = 'black',
@@ -9,6 +10,9 @@ export default class Actor {
         this.velocity = new Vector2D(),
         this.jumpDistance = 25;
         this.isOnGround = false,
+        this.isColliding = false,
+        this.isCollidingRight = false; //tt
+        this.isCollidginLeft = false; //tt
         this.speed = 5
     }
 
