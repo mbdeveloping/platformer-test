@@ -11,8 +11,8 @@ export default class Game {
         this.world = new World(this.canvasWidth, this.canvasHeight, this.canvasWidth, this.canvasHeight, this.debug)
     }
 
-    update(step) {
-        this.world.update();
+    update(step, currentTime) {
+        this.world.update(step, currentTime);
         
         //movements
         if (controller.left.active) {

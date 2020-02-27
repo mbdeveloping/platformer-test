@@ -17,7 +17,7 @@ export default class Engine {
 
         while(this.deltaTime > this.step) {
             this.deltaTime = this.deltaTime - this.step;
-            this.game.update(this.step);
+            this.game.update(this.step, this.currentTime);
         }
 
         this.game.render();

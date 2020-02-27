@@ -112,11 +112,13 @@ function () {
     _classCallCheck(this, Actor);
 
     this.type = 'npc', this.height = 100, this.width = 50, this.color = 'black', this.position = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0), this.velocity = new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](), this.jumpDistance = 25;
-    this.isOnGround = false, this.isColliding = false, this.isCollidingRight = false; //tt
-
-    this.isCollidginLeft = false; //tt
-
-    this.speed = 5;
+    this.isOnGround = false, this.collide = {
+      active: false,
+      top: false,
+      bottom: false,
+      left: false,
+      right: false
+    }, this.speed = 5;
   }
 
   _createClass(Actor, [{
@@ -296,23 +298,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Enemy; });
 /* harmony import */ var _Actor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Actor */ "./src/es/Actor.js");
 /* harmony import */ var _Vector__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vector */ "./src/es/Vector.js");
+/* harmony import */ var _EnemyAI__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EnemyAI */ "./src/es/EnemyAI.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -328,49 +328,134 @@ function (_Actor) {
     _classCallCheck(this, Enemy);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Enemy).call(this));
-    _this.color = 'blue', _this.position = new _Vector__WEBPACK_IMPORTED_MODULE_1__["default"](posX, posY), //enemy specific
-    _this.speed = 1, _this.isOnCombat = false, _this.ai = {
-      isOnCombat: false,
-      isMoving: false
-    };
+    _this.color = 'blue', _this.position = new _Vector__WEBPACK_IMPORTED_MODULE_1__["default"](posX, posY), _this.speed = 1, _this.ai = new _EnemyAI__WEBPACK_IMPORTED_MODULE_2__["default"](_assertThisInitialized(_this));
     return _this;
   }
 
-  _createClass(Enemy, [{
+  return Enemy;
+}(_Actor__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+
+/***/ }),
+
+/***/ "./src/es/EnemyAI.js":
+/*!***************************!*\
+  !*** ./src/es/EnemyAI.js ***!
+  \***************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EnemyAI; });
+/* harmony import */ var _Vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector */ "./src/es/Vector.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var EnemyAI =
+/*#__PURE__*/
+function () {
+  function EnemyAI(actor) {
+    _classCallCheck(this, EnemyAI);
+
+    this.actor = actor, this.debug = {
+      active: true
+    }, this.combat = {
+      active: false,
+      width: 300,
+      height: 250,
+      position: new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](this.actor.position.getX - this.width / 2 + this.actor.width / 2, this.actor.position.getY - this.height / 2),
+
+      get left() {
+        return this.position.getX;
+      },
+
+      get right() {
+        return this.position.getX + this.width;
+      },
+
+      get top() {
+        return this.position.getY;
+      },
+
+      get bottom() {
+        return this.position.getY + this.height;
+      }
+
+    };
+    this.isMoving = false, this.isAboutToFall = false;
+  }
+
+  _createClass(EnemyAI, [{
     key: "patrol",
     value: function patrol() {
       var randomDesision = Math.random() < 0.5 ? -1 : 1;
 
-      if (!this.isOnCombat) {
-        if (this.isColliding) {
-          if (!this.ai.isMoving) {
+      if (!this.combat.active) {
+        if (this.actor.collide.active) {
+          if (!this.isMoving) {
             //if not moving, make enemy move randomly left or right
-            this.ai.isMoving = true;
+            this.isMoving = true;
 
             if (randomDesision > 0) {
-              this.moveRight();
+              this.actor.moveRight();
             } else {
-              this.moveLeft();
+              this.actor.moveLeft();
             }
           } else {
             //if enemy is already moving
-            if (this.isCollidingRight) {
-              this.moveLeft();
+            if (this.isAboutToFall) {
+              this.actor.velocity.setX(-this.actor.velocity.getX);
             }
 
-            if (this.isCollidingLeft) {
-              this.moveRight();
+            if (this.actor.collide.right) {
+              this.actor.moveLeft();
+            }
+
+            if (this.actor.collide.left) {
+              this.actor.moveRight();
             }
           }
-        } // console.log(this.isCollidingRight);
-        // console.log(this.isCollidingLeft);
-
+        }
       }
+    }
+  }, {
+    key: "followTarget",
+    value: function followTarget(target) {
+      while (this.actor.position.getX !== target.position.getX) {
+        this.actor.position.setX(this.actor.position.getX + this.actor.speed);
+      }
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      var _this = this;
+
+      this.combat.position.setX(this.actor.position.getX - this.combat.width / 2 + this.actor.width / 2);
+      this.combat.position.setY(this.actor.position.getY - this.combat.height / 2);
+
+      if (this.combat.active) {
+        setTimeout(function () {
+          _this.combat.active = false;
+          console.log('not in combat');
+        }, 5000);
+      }
+    }
+  }, {
+    key: "render",
+    value: function render(ctx) {
+      ctx.strokeRect(this.combat.position.x, this.combat.position.y, this.combat.width, this.combat.height);
     }
   }]);
 
-  return Enemy;
-}(_Actor__WEBPACK_IMPORTED_MODULE_0__["default"]);
+  return EnemyAI;
+}();
 
 
 
@@ -416,7 +501,7 @@ function () {
 
       while (this.deltaTime > this.step) {
         this.deltaTime = this.deltaTime - this.step;
-        this.game.update(this.step);
+        this.game.update(this.step, this.currentTime);
       }
 
       this.game.render();
@@ -476,8 +561,8 @@ function () {
 
   _createClass(Game, [{
     key: "update",
-    value: function update(step) {
-      this.world.update(); //movements
+    value: function update(step, currentTime) {
+      this.world.update(step, currentTime); //movements
 
       if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active) {
         this.world.player.moveLeft();
@@ -803,10 +888,11 @@ function () {
       var inresectingPlatforms = this.getInsersectingPlatforms(actor);
 
       if (inresectingPlatforms.length > 0) {
-        actor.isColliding = true;
+        actor.collide.active = true;
       } else {
-        actor.isColliding = false;
-      }
+        actor.collide.active = false;
+      } // console.log(inresectingPlatforms);
+
 
       inresectingPlatforms.forEach(function (platform, i) {
         if (_this2.objectCollide(actor, platform)) {
@@ -817,35 +903,57 @@ function () {
           } //bottom
 
 
-          if (actor.velocity.y > 0 && actor.bottom >= platform.top && actor.bottom < platform.top + actor.velocity.getY && actor.left < platform.right && actor.right > platform.left) {
+          if (actor.bottom >= platform.top && actor.bottom < platform.top + actor.velocity.getY) {
+            actor.collide.bottom = true;
             actor.isOnGround = true;
             actor.position.setY(platform.top - actor.height); // console.log('bottom');
-          } //left
+          } else {} // actor.collide.bottom = false;
+            //left
 
 
           if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
-            actor.isCollidingLeft = true;
+            actor.collide.left = true;
 
             if (actor.type === 'player') {
               actor.velocity.setX(0);
               actor.position.setX(platform.right + 1); // console.log('left');
             }
           } else {
-            actor.isCollidingLeft = false;
+            actor.collide.left = false;
           } //right
 
 
           if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
             // console.log('right');
-            actor.isCollidingRight = true;
+            actor.collide.right = true;
 
             if (actor.type === 'player') {
               actor.velocity.setX(0);
               actor.position.setX(platform.left - actor.width - 1);
             }
           } else {
-            actor.isCollidingRight = false;
+            actor.collide.right = false;
           }
+
+          if (actor.type === 'npc' && actor.collide.bottom && !actor.collide.right && !actor.collide.left) {
+            if (actor.right - actor.width / 2 > platform.right && actor.left < platform.right || actor.left + actor.width / 2 < platform.left && actor.right > platform.left) {
+              actor.ai.isAboutToFall = true;
+            } else {
+              actor.ai.isAboutToFall = false;
+            }
+          }
+        }
+      });
+    }
+  }, {
+    key: "combatCollision",
+    value: function combatCollision(player, enemies) {
+      var _this3 = this;
+
+      enemies.forEach(function (enemy) {
+        if (_this3.objectCollide(player, enemy.ai.combat)) {
+          enemy.ai.combat.active = true;
+        } else {// enemy.ai.combat.active = false;
         }
       });
     }
@@ -892,31 +1000,40 @@ function () {
     }
   }, {
     key: "update",
-    value: function update() {
-      var _this3 = this;
+    value: function update(step, currentTime) {
+      var _this4 = this;
 
       this.actors.forEach(function (actor) {
         actor.update();
 
-        _this3.actorWorldCollision(actor);
+        _this4.actorWorldCollision(actor);
 
-        _this3.worldBoundriesCollision(actor);
+        _this4.worldBoundriesCollision(actor);
+
+        if (actor.type === 'player') {// console.log(actor.collide.bottom);
+        }
+
+        if (actor.type === 'npc' && actor.ai.debug.active) {
+          actor.ai.update();
+        }
       });
+      this.combatCollision(this.actors[this.actors.length - 1], this.enemies);
 
       if (this.debug) {
         this.gravity = 0;
       }
 
       this.actors.forEach(function (actor) {
-        if (actor.isColliding && actor.isOnGround) {
+        if (actor.collide.active && actor.isOnGround) {
           actor.velocity.setY(0);
         } else {
           actor.isOnGround = false;
-          actor.velocity.setY(actor.velocity.getY + _this3.gravity);
+          actor.collide.bottom = false;
+          actor.velocity.setY(actor.velocity.getY + _this4.gravity);
         }
       });
       this.enemies.forEach(function (enemy) {
-        enemy.patrol();
+        enemy.ai.patrol();
       });
       this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
     }
@@ -927,6 +1044,10 @@ function () {
       this.renderPlatforms(ctx);
       this.actors.forEach(function (actor) {
         actor.render(ctx);
+
+        if (actor.type === 'npc' && actor.ai.debug.active) {
+          actor.ai.render(ctx);
+        }
       });
     }
   }]);

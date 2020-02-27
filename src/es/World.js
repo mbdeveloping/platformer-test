@@ -61,10 +61,12 @@ export default class World {
         let inresectingPlatforms = this.getInsersectingPlatforms(actor);
 
         if (inresectingPlatforms.length > 0) {
-            actor.isColliding = true;
+            actor.collide.active = true;
         } else {
-            actor.isColliding = false;
+            actor.collide.active = false;
         }
+
+        // console.log(inresectingPlatforms);
 
         inresectingPlatforms.forEach((platform, i) => {
             if (this.objectCollide(actor, platform)) {
@@ -77,15 +79,19 @@ export default class World {
                 }
 
                 //bottom
-                if (actor.velocity.y > 0 && actor.bottom >= platform.top && actor.bottom < platform.top + actor.velocity.getY && actor.left < platform.right && actor.right > platform.left) {
+                if (actor.bottom >= platform.top && actor.bottom < platform.top + actor.velocity.getY) {
+                    actor.collide.bottom = true;
+
                     actor.isOnGround = true;
                     actor.position.setY(platform.top - actor.height);
                     // console.log('bottom');
+                } else {
+                    // actor.collide.bottom = false;
                 }
 
                 //left
                 if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
-                    actor.isCollidingLeft = true;
+                    actor.collide.left = true;
 
                     if (actor.type === 'player') {
                         actor.velocity.setX(0);
@@ -93,21 +99,39 @@ export default class World {
                         // console.log('left');
                     }
                 } else {
-                    actor.isCollidingLeft = false;
+                    actor.collide.left = false;
                 }
 
                 //right
                 if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
                     // console.log('right');
-                    actor.isCollidingRight = true;
+                    actor.collide.right = true;
 
                     if (actor.type === 'player') {
                         actor.velocity.setX(0);
                         actor.position.setX(platform.left - actor.width - 1); 
                     }
                 } else {
-                    actor.isCollidingRight = false;
+                    actor.collide.right = false;
                 }
+
+                if (actor.type === 'npc' && actor.collide.bottom && !actor.collide.right && !actor.collide.left) {
+                    if (actor.right - (actor.width / 2) > platform.right && actor.left < platform.right || actor.left + (actor.width / 2) < platform.left && actor.right > platform.left) {
+                        actor.ai.isAboutToFall = true;
+                    } else {
+                        actor.ai.isAboutToFall = false;
+                    }
+                }
+            }
+        });
+    }
+
+    combatCollision(player, enemies) {
+        enemies.forEach(enemy => {
+            if (this.objectCollide(player, enemy.ai.combat)) {
+                enemy.ai.combat.active = true;
+            } else {
+                // enemy.ai.combat.active = false;
             }
         });
     }
@@ -149,26 +173,37 @@ export default class World {
         playerPosX.innerText = this.player.position.getX;
     }
 
-    update() {
+    update(step, currentTime) {
         this.actors.forEach(actor => {
             actor.update();
             this.actorWorldCollision(actor);
             this.worldBoundriesCollision(actor);
+
+            if (actor.type === 'player') {
+                // console.log(actor.collide.bottom);
+            }
+
+            if (actor.type === 'npc' && actor.ai.debug.active) {
+                actor.ai.update();
+            }
         });
+
+        this.combatCollision(this.actors[this.actors.length - 1], this.enemies);
         
         if (this.debug) {this.gravity = 0}
 
         this.actors.forEach(actor => {
-            if (actor.isColliding && actor.isOnGround) {
+            if (actor.collide.active && actor.isOnGround) {
                 actor.velocity.setY(0);
             } else {
                 actor.isOnGround = false;
+                actor.collide.bottom = false;
                 actor.velocity.setY(actor.velocity.getY + this.gravity);
             }
         });
 
         this.enemies.forEach(enemy => {
-            enemy.patrol();
+            enemy.ai.patrol();
         });
 
         this.updateDebugText();
@@ -180,6 +215,9 @@ export default class World {
         this.renderPlatforms(ctx);
         this.actors.forEach(actor => {
             actor.render(ctx);
+            if (actor.type === 'npc' && actor.ai.debug.active) {
+                actor.ai.render(ctx);
+            }
         });
     }
 }
