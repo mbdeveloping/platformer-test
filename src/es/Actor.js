@@ -10,13 +10,17 @@ export default class Actor {
         this.velocity = new Vector2D(),
         this.jumpDistance = 25;
         this.isOnGround = false,
-        this.isColliding = false,
-        this.isCollidingRight = false; //tt
-        this.isCollidginLeft = false; //tt
+        this.collide = {
+            active: false,
+            top: false,
+            bottom: false,
+            left: false,
+            right: false
+        },
         this.speed = 5
     }
 
-    get left() {
+    get left() { 
         return this.position.x;
     }
 
@@ -33,7 +37,7 @@ export default class Actor {
     }
 
     moveLeft() {
-        this.velocity.setX(-this.speed);
+        this.velocity.setX(-this.speed); 
     }
 
     moveRight() {
