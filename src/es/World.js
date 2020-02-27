@@ -79,7 +79,7 @@ export default class World {
                 }
 
                 //bottom
-                if (actor.bottom > platform.top && actor.bottom < platform.top + actor.velocity.getY) {
+                if (actor.bottom >= platform.top && actor.bottom < platform.top + actor.velocity.getY) {
                     actor.collide.bottom = true;
 
                     actor.isOnGround = true;
@@ -189,7 +189,7 @@ export default class World {
         this.enemies.forEach(enemy => {
             enemy.ai.patrol();
 
-            console.log(enemy.ai.isAboutToFall);
+            // console.log(enemy.ai.isAboutToFall);
         });
 
         this.updateDebugText();

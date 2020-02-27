@@ -848,7 +848,7 @@ function () {
           } //bottom
 
 
-          if (actor.bottom > platform.top && actor.bottom < platform.top + actor.velocity.getY) {
+          if (actor.bottom >= platform.top && actor.bottom < platform.top + actor.velocity.getY) {
             actor.collide.bottom = true;
             actor.isOnGround = true;
             actor.position.setY(platform.top - actor.height); // console.log('bottom');
@@ -961,8 +961,7 @@ function () {
         }
       });
       this.enemies.forEach(function (enemy) {
-        enemy.ai.patrol();
-        console.log(enemy.ai.isAboutToFall);
+        enemy.ai.patrol(); // console.log(enemy.ai.isAboutToFall);
       });
       this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
     }
