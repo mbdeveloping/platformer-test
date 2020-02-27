@@ -365,8 +365,7 @@ function () {
     _classCallCheck(this, EnemyAI);
 
     this.actor = actor, this.debug = {
-      active: true,
-      border: {}
+      active: true
     }, this.combat = {
       active: false,
       width: 300,
@@ -390,7 +389,7 @@ function () {
       }
 
     };
-    this.isMoving = false, this.isOnCombat = false, this.isAboutToFall = false;
+    this.isMoving = false, this.isAboutToFall = false;
   }
 
   _createClass(EnemyAI, [{
@@ -398,7 +397,7 @@ function () {
     value: function patrol() {
       var randomDesision = Math.random() < 0.5 ? -1 : 1;
 
-      if (!this.isOnCombat) {
+      if (!this.combat.active) {
         if (this.actor.collide.active) {
           if (!this.isMoving) {
             //if not moving, make enemy move randomly left or right
@@ -427,10 +426,26 @@ function () {
       }
     }
   }, {
+    key: "followTarget",
+    value: function followTarget(target) {
+      while (this.actor.position.getX !== target.position.getX) {
+        this.actor.position.setX(this.actor.position.getX + this.actor.speed);
+      }
+    }
+  }, {
     key: "update",
     value: function update() {
+      var _this = this;
+
       this.combat.position.setX(this.actor.position.getX - this.combat.width / 2 + this.actor.width / 2);
       this.combat.position.setY(this.actor.position.getY - this.combat.height / 2);
+
+      if (this.combat.active) {
+        setTimeout(function () {
+          _this.combat.active = false;
+          console.log('not in combat');
+        }, 5000);
+      }
     }
   }, {
     key: "render",
@@ -486,7 +501,7 @@ function () {
 
       while (this.deltaTime > this.step) {
         this.deltaTime = this.deltaTime - this.step;
-        this.game.update(this.step);
+        this.game.update(this.step, this.currentTime);
       }
 
       this.game.render();
@@ -546,8 +561,8 @@ function () {
 
   _createClass(Game, [{
     key: "update",
-    value: function update(step) {
-      this.world.update(); //movements
+    value: function update(step, currentTime) {
+      this.world.update(step, currentTime); //movements
 
       if (_index__WEBPACK_IMPORTED_MODULE_0__["controller"].left.active) {
         this.world.player.moveLeft();
@@ -937,7 +952,8 @@ function () {
 
       enemies.forEach(function (enemy) {
         if (_this3.objectCollide(player, enemy.ai.combat)) {
-          console.log('combat colliding!'); // console.log(enemy.ai.combat.left);
+          enemy.ai.combat.active = true;
+        } else {// enemy.ai.combat.active = false;
         }
       });
     }
@@ -984,7 +1000,7 @@ function () {
     }
   }, {
     key: "update",
-    value: function update() {
+    value: function update(step, currentTime) {
       var _this4 = this;
 
       this.actors.forEach(function (actor) {
@@ -1017,7 +1033,7 @@ function () {
         }
       });
       this.enemies.forEach(function (enemy) {
-        enemy.ai.patrol(); // console.log(enemy.ai.isAboutToFall);
+        enemy.ai.patrol();
       });
       this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
     }

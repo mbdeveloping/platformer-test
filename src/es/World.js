@@ -129,8 +129,9 @@ export default class World {
     combatCollision(player, enemies) {
         enemies.forEach(enemy => {
             if (this.objectCollide(player, enemy.ai.combat)) {
-                console.log('combat colliding!');
-                // console.log(enemy.ai.combat.left);
+                enemy.ai.combat.active = true;
+            } else {
+                // enemy.ai.combat.active = false;
             }
         });
     }
@@ -172,7 +173,7 @@ export default class World {
         playerPosX.innerText = this.player.position.getX;
     }
 
-    update() {
+    update(step, currentTime) {
         this.actors.forEach(actor => {
             actor.update();
             this.actorWorldCollision(actor);
@@ -203,8 +204,6 @@ export default class World {
 
         this.enemies.forEach(enemy => {
             enemy.ai.patrol();
-
-            // console.log(enemy.ai.isAboutToFall);
         });
 
         this.updateDebugText();

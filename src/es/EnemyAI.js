@@ -4,10 +4,7 @@ export default class EnemyAI {
     constructor(actor) {
         this.actor = actor,
         this.debug = {
-            active: true,
-            border: {
-                
-            }
+            active: true
         },
         this.combat = {
             active: false,
@@ -28,14 +25,13 @@ export default class EnemyAI {
             }
         }
         this.isMoving = false,
-        this.isOnCombat = false,
         this.isAboutToFall = false
     }
 
     patrol() {
         let randomDesision = Math.random() < 0.5 ? -1 : 1;
 
-        if (!this.isOnCombat) {
+        if (!this.combat.active) {
             if (this.actor.collide.active) {
                 if(!this.isMoving) { //if not moving, make enemy move randomly left or right
                     this.isMoving = true;
@@ -60,9 +56,22 @@ export default class EnemyAI {
         }
     }
 
+    followTarget(target) {
+        while (this.actor.position.getX !== target.position.getX) {
+            this.actor.position.setX(this.actor.position.getX + this.actor.speed)
+        }
+    }
+
     update() {
         this.combat.position.setX(this.actor.position.getX - (this.combat.width / 2) + (this.actor.width / 2));
         this.combat.position.setY(this.actor.position.getY  - (this.combat.height / 2));
+
+        if (this.combat.active) {
+            setTimeout(() => {
+                this.combat.active = false;
+                console.log('not in combat');
+            }, 5000);
+        }
     }
 
     render(ctx) {
