@@ -1,6 +1,32 @@
+import Vector2D from "./Vector";
+
 export default class EnemyAI {
     constructor(actor) {
         this.actor = actor,
+        this.debug = {
+            active: true,
+            border: {
+                
+            }
+        },
+        this.combat = {
+            active: false,
+            width: 300,
+            height: 250,
+            position: new Vector2D(this.actor.position.getX - (this.width / 2) + (this.actor.width / 2), this.actor.position.getY  - (this.height / 2)),
+            get left() {
+                return this.position.getX;
+            },
+            get right() {
+                return this.position.getX + this.width;
+            },
+            get top() {
+                return this.position.getY;
+            },
+            get bottom() {
+                return this.position.getY + this.height;
+            }
+        }
         this.isMoving = false,
         this.isOnCombat = false,
         this.isAboutToFall = false
@@ -32,5 +58,14 @@ export default class EnemyAI {
                 }
             } 
         }
+    }
+
+    update() {
+        this.combat.position.setX(this.actor.position.getX - (this.combat.width / 2) + (this.actor.width / 2));
+        this.combat.position.setY(this.actor.position.getY  - (this.combat.height / 2));
+    }
+
+    render(ctx) {
+        ctx.strokeRect(this.combat.position.x, this.combat.position.y, this.combat.width, this.combat.height);
     }
 }

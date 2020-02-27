@@ -126,6 +126,15 @@ export default class World {
         });
     }
 
+    combatCollision(player, enemies) {
+        enemies.forEach(enemy => {
+            if (this.objectCollide(player, enemy.ai.combat)) {
+                console.log('combat colliding!');
+                // console.log(enemy.ai.combat.left);
+            }
+        });
+    }
+
     worldBoundriesCollision(actor) {
         // Left
         if (actor.left <= this.position.x) {
@@ -172,7 +181,13 @@ export default class World {
             if (actor.type === 'player') {
                 // console.log(actor.collide.bottom);
             }
+
+            if (actor.type === 'npc' && actor.ai.debug.active) {
+                actor.ai.update();
+            }
         });
+
+        this.combatCollision(this.actors[this.actors.length - 1], this.enemies);
         
         if (this.debug) {this.gravity = 0}
 
@@ -201,6 +216,9 @@ export default class World {
         this.renderPlatforms(ctx);
         this.actors.forEach(actor => {
             actor.render(ctx);
+            if (actor.type === 'npc' && actor.ai.debug.active) {
+                actor.ai.render(ctx);
+            }
         });
     }
 }

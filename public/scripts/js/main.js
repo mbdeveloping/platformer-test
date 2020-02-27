@@ -349,11 +349,14 @@ function (_Actor) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return EnemyAI; });
+/* harmony import */ var _Vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector */ "./src/es/Vector.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
 
 var EnemyAI =
 /*#__PURE__*/
@@ -361,7 +364,33 @@ function () {
   function EnemyAI(actor) {
     _classCallCheck(this, EnemyAI);
 
-    this.actor = actor, this.isMoving = false, this.isOnCombat = false, this.isAboutToFall = false;
+    this.actor = actor, this.debug = {
+      active: true,
+      border: {}
+    }, this.combat = {
+      active: false,
+      width: 300,
+      height: 250,
+      position: new _Vector__WEBPACK_IMPORTED_MODULE_0__["default"](this.actor.position.getX - this.width / 2 + this.actor.width / 2, this.actor.position.getY - this.height / 2),
+
+      get left() {
+        return this.position.getX;
+      },
+
+      get right() {
+        return this.position.getX + this.width;
+      },
+
+      get top() {
+        return this.position.getY;
+      },
+
+      get bottom() {
+        return this.position.getY + this.height;
+      }
+
+    };
+    this.isMoving = false, this.isOnCombat = false, this.isAboutToFall = false;
   }
 
   _createClass(EnemyAI, [{
@@ -396,6 +425,17 @@ function () {
           }
         }
       }
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      this.combat.position.setX(this.actor.position.getX - this.combat.width / 2 + this.actor.width / 2);
+      this.combat.position.setY(this.actor.position.getY - this.combat.height / 2);
+    }
+  }, {
+    key: "render",
+    value: function render(ctx) {
+      ctx.strokeRect(this.combat.position.x, this.combat.position.y, this.combat.width, this.combat.height);
     }
   }]);
 
@@ -891,6 +931,17 @@ function () {
       });
     }
   }, {
+    key: "combatCollision",
+    value: function combatCollision(player, enemies) {
+      var _this3 = this;
+
+      enemies.forEach(function (enemy) {
+        if (_this3.objectCollide(player, enemy.ai.combat)) {
+          console.log('combat colliding!'); // console.log(enemy.ai.combat.left);
+        }
+      });
+    }
+  }, {
     key: "worldBoundriesCollision",
     value: function worldBoundriesCollision(actor) {
       // Left
@@ -934,18 +985,23 @@ function () {
   }, {
     key: "update",
     value: function update() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.actors.forEach(function (actor) {
         actor.update();
 
-        _this3.actorWorldCollision(actor);
+        _this4.actorWorldCollision(actor);
 
-        _this3.worldBoundriesCollision(actor);
+        _this4.worldBoundriesCollision(actor);
 
         if (actor.type === 'player') {// console.log(actor.collide.bottom);
         }
+
+        if (actor.type === 'npc' && actor.ai.debug.active) {
+          actor.ai.update();
+        }
       });
+      this.combatCollision(this.actors[this.actors.length - 1], this.enemies);
 
       if (this.debug) {
         this.gravity = 0;
@@ -957,7 +1013,7 @@ function () {
         } else {
           actor.isOnGround = false;
           actor.collide.bottom = false;
-          actor.velocity.setY(actor.velocity.getY + _this3.gravity);
+          actor.velocity.setY(actor.velocity.getY + _this4.gravity);
         }
       });
       this.enemies.forEach(function (enemy) {
@@ -972,6 +1028,10 @@ function () {
       this.renderPlatforms(ctx);
       this.actors.forEach(function (actor) {
         actor.render(ctx);
+
+        if (actor.type === 'npc' && actor.ai.debug.active) {
+          actor.ai.render(ctx);
+        }
       });
     }
   }]);
