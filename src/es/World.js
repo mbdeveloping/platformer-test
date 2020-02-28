@@ -81,36 +81,27 @@ export default class World {
                 //bottom
                 if (actor.bottom >= platform.top && actor.bottom < platform.top + actor.velocity.getY) {
                     actor.collide.bottom = true;
-
                     actor.isOnGround = true;
                     actor.position.setY(platform.top - actor.height);
                     // console.log('bottom');
-                } else {
-                    // actor.collide.bottom = false;
                 }
 
                 //left
                 if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
                     actor.collide.left = true;
-
-                    if (actor.type === 'player') {
-                        actor.velocity.setX(0);
-                        actor.position.setX(platform.right + 1);
-                        // console.log('left');
-                    }
+                    actor.velocity.setX(0);
+                    actor.position.setX(platform.right + 1);
+                    console.log('left');
                 } else {
                     actor.collide.left = false;
                 }
 
                 //right
                 if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
-                    // console.log('right');
+                    console.log('right');
                     actor.collide.right = true;
-
-                    if (actor.type === 'player') {
-                        actor.velocity.setX(0);
-                        actor.position.setX(platform.left - actor.width - 1); 
-                    }
+                    actor.velocity.setX(0);
+                    actor.position.setX(platform.left - actor.width - 1); 
                 } else {
                     actor.collide.right = false;
                 }
@@ -184,7 +175,7 @@ export default class World {
             }
 
             if (actor.type === 'npc' && actor.ai.debug.active) {
-                actor.ai.update();
+                actor.ai.update(currentTime);
             }
         });
 
@@ -204,10 +195,16 @@ export default class World {
 
         this.enemies.forEach(enemy => {
             enemy.ai.patrol();
+
+            if (enemy.ai.combat.active) {
+                enemy.ai.followTarget(this.player);
+            }
         });
 
         this.updateDebugText();
         // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
+
+        // console.log(currentTime);
     }
 
     render(ctx) {

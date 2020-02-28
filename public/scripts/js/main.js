@@ -389,7 +389,7 @@ function () {
       }
 
     };
-    this.isMoving = false, this.isAboutToFall = false;
+    this.isMoving = false, this.isAboutToFall = false, this.lastTime = 0;
   }
 
   _createClass(EnemyAI, [{
@@ -428,23 +428,34 @@ function () {
   }, {
     key: "followTarget",
     value: function followTarget(target) {
-      while (this.actor.position.getX !== target.position.getX) {
-        this.actor.position.setX(this.actor.position.getX + this.actor.speed);
+      console.log('shasing!');
+
+      if (this.actor.right < target.left) {
+        this.actor.moveRight();
+      } else {
+        this.actor.moveLeft();
       }
     }
   }, {
     key: "update",
-    value: function update() {
-      var _this = this;
-
+    value: function update(currentTime) {
       this.combat.position.setX(this.actor.position.getX - this.combat.width / 2 + this.actor.width / 2);
       this.combat.position.setY(this.actor.position.getY - this.combat.height / 2);
 
       if (this.combat.active) {
-        setTimeout(function () {
-          _this.combat.active = false;
-          console.log('not in combat');
-        }, 5000);
+        // console.log('enemy is in combat');
+        this.actor.speed = 2;
+
+        if (this.lastTime === 0) {
+          this.lastTime = currentTime;
+        }
+
+        if (currentTime >= this.lastTime + 5000) {
+          this.combat.active = false;
+          this.lastTime = 0;
+          this.actor.speed = 1;
+          console.log('enemy is not in combat');
+        }
       }
     }
   }, {
@@ -907,30 +918,24 @@ function () {
             actor.collide.bottom = true;
             actor.isOnGround = true;
             actor.position.setY(platform.top - actor.height); // console.log('bottom');
-          } else {} // actor.collide.bottom = false;
-            //left
+          } //left
 
 
           if (actor.left < platform.right && actor.right > platform.right && actor.bottom > platform.top && actor.top < platform.bottom) {
             actor.collide.left = true;
-
-            if (actor.type === 'player') {
-              actor.velocity.setX(0);
-              actor.position.setX(platform.right + 1); // console.log('left');
-            }
+            actor.velocity.setX(0);
+            actor.position.setX(platform.right + 1);
+            console.log('left');
           } else {
             actor.collide.left = false;
           } //right
 
 
           if (actor.right > platform.left && actor.left < platform.left && actor.bottom > platform.top && actor.top < platform.bottom) {
-            // console.log('right');
+            console.log('right');
             actor.collide.right = true;
-
-            if (actor.type === 'player') {
-              actor.velocity.setX(0);
-              actor.position.setX(platform.left - actor.width - 1);
-            }
+            actor.velocity.setX(0);
+            actor.position.setX(platform.left - actor.width - 1);
           } else {
             actor.collide.right = false;
           }
@@ -1014,7 +1019,7 @@ function () {
         }
 
         if (actor.type === 'npc' && actor.ai.debug.active) {
-          actor.ai.update();
+          actor.ai.update(currentTime);
         }
       });
       this.combatCollision(this.actors[this.actors.length - 1], this.enemies);
@@ -1034,8 +1039,13 @@ function () {
       });
       this.enemies.forEach(function (enemy) {
         enemy.ai.patrol();
+
+        if (enemy.ai.combat.active) {
+          enemy.ai.followTarget(_this4.player);
+        }
       });
       this.updateDebugText(); // this.platforms[1].setX(this.platforms[1].getX + 1); // move platform
+      // console.log(currentTime);
     }
   }, {
     key: "render",

@@ -25,7 +25,8 @@ export default class EnemyAI {
             }
         }
         this.isMoving = false,
-        this.isAboutToFall = false
+        this.isAboutToFall = false,
+        this.lastTime = 0
     }
 
     patrol() {
@@ -57,20 +58,29 @@ export default class EnemyAI {
     }
 
     followTarget(target) {
-        while (this.actor.position.getX !== target.position.getX) {
-            this.actor.position.setX(this.actor.position.getX + this.actor.speed)
+        console.log('shasing!');
+        if (this.actor.right < target.left) {
+            this.actor.moveRight();
+        } else {
+            this.actor.moveLeft();
         }
     }
 
-    update() {
+    update(currentTime) {
         this.combat.position.setX(this.actor.position.getX - (this.combat.width / 2) + (this.actor.width / 2));
         this.combat.position.setY(this.actor.position.getY  - (this.combat.height / 2));
 
         if (this.combat.active) {
-            setTimeout(() => {
+            // console.log('enemy is in combat');
+            this.actor.speed = 2;
+            if (this.lastTime === 0) { this.lastTime = currentTime; }
+
+            if (currentTime >= this.lastTime + 5000) {
                 this.combat.active = false;
-                console.log('not in combat');
-            }, 5000);
+                this.lastTime = 0;
+                this.actor.speed = 1;
+                console.log('enemy is not in combat');
+            }
         }
     }
 
